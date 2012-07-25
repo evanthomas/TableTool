@@ -1,5 +1,13 @@
 bin
-doc
+*.pdf
+*.png
 war
 .settings
 *.wmw
+*.class
+*.jar
+*.war
+*.ear
+*.mdl
+antlr-generated
+
