@@ -1,4 +1,4 @@
-package modelBuild;
+package modelView;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -76,7 +76,7 @@ public class Expression implements Serializable {
 		valid = true;
 	}
 	
-	public String toString() { return "Expr: "+expr+"  Function"+f; }
+	public String toString() { return "Expr: "+expr+"  Function "+f; }
 
 	public void setUI(JTextComponent t) {
 		this.tf = t;

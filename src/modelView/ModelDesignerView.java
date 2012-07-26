@@ -1,4 +1,4 @@
-package modelBuild;
+package modelView;
 
 import javax.swing.JFrame;
 import java.awt.Toolkit;
@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import modelState.AppState;
 import expressionEvaluator.ParseException;
 
 import java.awt.event.FocusAdapter;
@@ -42,9 +43,6 @@ import solving.SolverType;
 
 public class ModelDesignerView extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private JTable globalExpressionTable;
@@ -88,20 +86,17 @@ public class ModelDesignerView extends JFrame {
 		AppState.getRundurEH().setString("100");
 		
 		solver.setSelectedItem(SolverType.RungeKutta);
-		
-		addNewTab();
-		addNewTab();
-		addNewTab();
 	}
 	
-	public CurrentTab addNewTab() {
-		return new CurrentTab(CurrentTabs);
+	public CurrentTab addNewHHTab() {
+		return new HHCurrentTab(CurrentTabs);
 	}
 	
-	public CurrentTab restoreTab(CurrentState c) {
-		return new CurrentTab(CurrentTabs, (HHCurrentState)c);
+	public StepCurrentTab addNewStepTab() {
+		return new StepCurrentTab(CurrentTabs);
 	}
 	
+
 	public void reset() {
 		CurrentTabs.removeAll();
 		
@@ -130,6 +125,10 @@ public class ModelDesignerView extends JFrame {
 	public void setDoVoltagePlots(boolean s)  { chckbxVoltage.setSelected(s);  }
 	public void setDoGatePlots(boolean s)     { chckbxGates.setSelected(s);    }
 	public void setDoStimulusPlots(boolean s) { chckbxStimulus.setSelected(s); }
+
+	public JTabbedPane getCurrentTabs() {
+		return CurrentTabs;
+	}
 	
 	/**
 	 * Initialize the contents of the frame.
@@ -324,12 +323,17 @@ public class ModelDesignerView extends JFrame {
 		JButton btnNewHHCurrent = new JButton("New HH current");
 		btnNewHHCurrent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				addNewTab();
+				addNewHHTab();
 			}
 		});
 		btnNewHHCurrent.setBounds(233, 259, 123, 26);
 		
 		JButton btnNewStim = new JButton("New stimulus");
+		btnNewStim.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				addNewStepTab();
+			}
+		});
 		btnNewStim.setBounds(368, 259, 118, 26);
 		
 		JPanel plotOptionsPanel = new JPanel();
@@ -553,4 +557,5 @@ public class ModelDesignerView extends JFrame {
 		});
 		getContentPane().add(CurrentTabs);
 	}
+
 }

@@ -1,4 +1,4 @@
-package modelBuild;
+package modelView;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;

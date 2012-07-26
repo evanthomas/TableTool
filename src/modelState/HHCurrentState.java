@@ -1,8 +1,13 @@
-package modelBuild;
+package modelState;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+
+import modelView.CurrentTab;
+import modelView.Expression;
+import modelView.HHCurrentTab;
+import modelView.ModelDesignerView;
 
 import physicalObjects.HHCurrent;
 
@@ -49,7 +54,7 @@ public class HHCurrentState extends CurrentState {
 	}
 
 
-	public void setUI(CurrentTab ui) {
+	public void setUI(HHCurrentTab ui) {
 		physicalCurrent = new HHCurrent(name, conductance, reversal);
 		super.setUI(ui);
 		
@@ -60,9 +65,9 @@ public class HHCurrentState extends CurrentState {
 			ui.restoreTab(g);
 		}
 	}
-
-	public void setName(String newname) {
-		name = newname;
+	
+	public void restore(ModelDesignerView ui) {
+		new HHCurrentTab(ui.getCurrentTabs(), this);
 	}
 
 }

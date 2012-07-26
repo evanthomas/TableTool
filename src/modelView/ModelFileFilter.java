@@ -1,4 +1,4 @@
-package modelBuild;
+package modelView;
 
 import java.io.File;
 import javax.swing.filechooser.FileFilter;

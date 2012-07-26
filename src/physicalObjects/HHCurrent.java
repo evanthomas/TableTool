@@ -4,7 +4,7 @@ package physicalObjects;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import modelBuild.Expression;
+import modelView.Expression;
 
 import expressionEvaluator.ParseException;
 

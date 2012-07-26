@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import expressionEvaluator.ParseException;
 
-import modelBuild.AppState;
-import modelBuild.CurrentState;
+import modelState.AppState;
+import modelState.CurrentState;
 
 import physicalObjects.Current;
 import physicalObjects.HHCurrent;

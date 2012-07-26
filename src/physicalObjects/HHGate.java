@@ -1,7 +1,7 @@
 package physicalObjects;
 
-import modelBuild.AppState;
-import modelBuild.Expression;
+import modelState.AppState;
+import modelView.Expression;
 import expressionEvaluator.ParseException;
 
 public class HHGate {

@@ -1,4 +1,4 @@
-package modelBuild;
+package modelView;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -23,6 +23,9 @@ import java.awt.event.FocusEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
+import modelState.GateState;
+import modelState.HHCurrentState;
+
 public class GateTab extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
@@ -41,7 +44,6 @@ public class GateTab extends JPanel {
 	private HHCurrentState owningCurrent;
 	private JSpinner spinner;
 
-	private static int cnt;
 	public GateTab(JTabbedPane GateTabPanel, CurrentTab owningPanel, HHCurrentState owningCurrent) {
 		super();
 		this.GateTabPanel = GateTabPanel;
@@ -58,44 +60,9 @@ public class GateTab extends JPanel {
 		this.owningCurrent = owningCurrent;
 		gateState = new GateState(this, owningCurrent, tau, inf, alpha, beta);
 		owningCurrent.addGate(gateState);
-		
-		switch(cnt) {
-		case 0:
-			String as = "0.288*((V+46)/(1-exp((V+46)/-10)))";
-			String bs = "1.38*(exp((V+46)/-18))";
-			txtpnAlpha.setText(as);
-			txtpnBeta.setText(bs);
-			alpha.setString(as);
-			beta.setString(bs);
-			setName("m");
-			gateState.setExponent(3);
-			break;
-			
-		case 1:
-			as = "0.0081*(exp((V+45)/-14.7))";
-			bs = "4.38/(1+exp((V+45)/-9))";
-			txtpnAlpha.setText(as);
-			txtpnBeta.setText(bs);
-			alpha.setString(as);
-			beta.setString(bs);
-			setName("h");
-			break;
-			
-		case 2:
-			as = "0.0131*((V+40)/(1-exp((V+40)/-7)))";
-			bs = "0.067*(exp((V+40)/-40))";
-			txtpnAlpha.setText(as);
-			txtpnBeta.setText(bs);
-			alpha.setString(as);
-			beta.setString(bs);
-			setName("n");
-			gateState.setExponent(4);
-			break;
-		}
-		cnt++;
 	}
 
-	public GateTab(JTabbedPane GateTabPanel, CurrentTab owningPanel, GateState gateState) {
+	public GateTab(JTabbedPane GateTabPanel, HHCurrentTab owningPanel, GateState gateState) {
 		super();
 		this.GateTabPanel = GateTabPanel;
 		this.owningPanel  = owningPanel;
@@ -114,7 +81,7 @@ public class GateTab extends JPanel {
 		alpha.setUI(txtpnAlpha);
 		beta.setUI(txtpnBeta);
 		
-		owningCurrent = owningPanel.getHHCurrentState();
+		owningCurrent = (HHCurrentState) owningPanel.getHHCurrentState();
 	}
 
 	public void setName(String newname) {
@@ -161,21 +128,7 @@ public class GateTab extends JPanel {
 			}
 		});
 		spinner.setBounds(290, 78, 31, 20);
-		switch(cnt) {
-		case 0:
-			spinner.setModel(new SpinnerNumberModel(new Integer(3), new Integer(0), null, new Integer(1)));
-			break;
-		case 1:
-			spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(0), null, new Integer(1)));
-			break;
-		case 2:
-			spinner.setModel(new SpinnerNumberModel(new Integer(4), new Integer(0), null, new Integer(1)));
-			break;
-			
-		default:
-			spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(0), null, new Integer(1)));
-			break;
-		}
+		spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(0), null, new Integer(1)));
 		
 		JLabel lblExponent = new JLabel("Exponent");
 		lblExponent.setBounds(236, 81, 53, 14);

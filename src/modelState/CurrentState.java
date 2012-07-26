@@ -1,6 +1,9 @@
-package modelBuild;
+package modelState;
 
 import java.io.Serializable;
+
+import modelView.CurrentTab;
+import modelView.ModelDesignerView;
 
 import physicalObjects.Current;
 
@@ -45,4 +48,10 @@ public abstract class CurrentState implements Serializable {
 		ui.setNotes(notes);
 		ui.setName(name);
 	}
+
+	public void setName(String newname) {
+		name = newname;
+	}
+
+	public abstract void restore(ModelDesignerView ui);
 }

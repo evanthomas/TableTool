@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-import modelBuild.ModelDesignerView;
+import modelView.ModelDesignerView;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;

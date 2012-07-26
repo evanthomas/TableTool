@@ -1,10 +1,9 @@
-package modelBuild;
+package modelView;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.border.BevelBorder;
@@ -19,29 +18,26 @@ import java.awt.event.FocusEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
-public class CurrentTab extends JPanel {
+import modelState.AppState;
+import modelState.CurrentState;
+import modelState.GateState;
+import modelState.HHCurrentState;
+
+public class HHCurrentTab extends CurrentTab {
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3360394991820161758L;
+	private static final long serialVersionUID = 1L;
 	
 	private JTabbedPane gatePane;
-	private JTabbedPane CurrentTabPanel;
 	private JTextField txtReversal;
 	private JTextField txtConductance;
 	private Expression reversal;
 	private Expression conductance;
-	private HHCurrentState currentState;
-	private JCheckBox chckbxIncludeCurrent;
-	private JCheckBox chckbxCurrentEnabled;
-	private JEditorPane txtrCurrentNotes;
-
-	
-	static private int cnt;
 
 	// Used during create from UI
-	public CurrentTab(JTabbedPane CurrentTabPanel) {
+	/**
+	 * @wbp.parser.constructor
+	 */
+	public HHCurrentTab(JTabbedPane CurrentTabPanel) {
 		super();
 		this.CurrentTabPanel = CurrentTabPanel;
 		
@@ -53,48 +49,13 @@ public class CurrentTab extends JPanel {
 		AppState.addCurrent(currentState);
 		
 		CurrentTabPanel.setSelectedComponent(this);
-
-		
-		String reversalTXT = null;
-		String gmaxTXT = null;
-		switch(cnt) {
-		case 0:
-			setName("Leak");
-			reversalTXT = "-90";
-			gmaxTXT = "2";
-			break;
-			
-		case 1:
-			setName("Na");
-			reversalTXT = "47.5834";
-			gmaxTXT = "4.1694e+002";
-			addNewTab();
-			addNewTab();
-			break;
-			
-		case 2:
-			setName("K");
-			reversalTXT = "-93.1320";
-			gmaxTXT = "600400e-4";
-			addNewTab();
-			AppState.addCurrent(new StepCurrentState(this, "stim current", 10, 90, 30));
-			break;
-		}
-
-		txtReversal.setText(reversalTXT);
-		txtConductance.setText(gmaxTXT);
-		
-		reversal.setString(reversalTXT);
-		conductance.setString(gmaxTXT);
-		cnt++;
-
 	}
 	
 	// Used during restore
-	public CurrentTab(JTabbedPane CurrentTabPanel, HHCurrentState currentState) {
+	public HHCurrentTab(JTabbedPane currentTabPanel, HHCurrentState currentState) {
 		
 		super();
-		this.CurrentTabPanel = CurrentTabPanel;
+		this.CurrentTabPanel = currentTabPanel;
 		
 		initialize();
 		
@@ -106,47 +67,19 @@ public class CurrentTab extends JPanel {
 		conductance.setUI(txtConductance);
 		reversal.setUI(txtReversal);
 		
-		CurrentTabPanel.setSelectedComponent(this);		
+		currentTabPanel.setSelectedComponent(this);		
 	}
 	
 	public GateTab addNewTab() {
-		return new GateTab(gatePane, this, currentState);
+		return new GateTab(gatePane, this, (HHCurrentState) currentState);
 	}
 	
 	public GateTab restoreTab(GateState g) {
 		return new GateTab(gatePane, this, g);
 	}
 	
-	private void delete() {
-		AppState.removeCurrent(currentState);
-		CurrentTabPanel.remove(this);
-	}
-	
-	private String myName() {
-		int i = CurrentTabPanel.indexOfComponent(this);
-		return CurrentTabPanel.getTitleAt(i);
-	}
-	
-	public void setName(String newname) {
-		super.setName(newname); // A kludge to allow gate plots access to this tab name
-		int i = CurrentTabPanel.indexOfComponent(this);
-		CurrentTabPanel.setTitleAt(i, newname);
-		currentState.setName(newname);
-	}
-	
-	public HHCurrentState getHHCurrentState() { return currentState; }
-	
-	public void setEnabled(boolean b) {
-		chckbxCurrentEnabled.setSelected(b);
-	}
-	
-	public void setDoPlots(boolean b) {
-		chckbxIncludeCurrent.setSelected(b);
-	}
-	
-	public void setNotes(String g) {
-		txtrCurrentNotes.setText(g);
-	}
+
+	public CurrentState getHHCurrentState() { return currentState; }
 	
 	private void initialize() {
 		CurrentTabPanel.addTab("HH current", null, this, null);
@@ -155,12 +88,12 @@ public class CurrentTab extends JPanel {
 		gatePane.setBounds(350, 20, 351, 364);
 		gatePane.setBorder(new TitledBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null), "Gates", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		
-		chckbxCurrentEnabled = new JCheckBox("Enabled");
-		chckbxCurrentEnabled.setBounds(21, 19, 78, 23);
-		chckbxCurrentEnabled.setSelected(true);
-		chckbxCurrentEnabled.addChangeListener(new ChangeListener() {
+		enabled = new JCheckBox("Enabled");
+		enabled.setBounds(21, 19, 78, 23);
+		enabled.setSelected(true);
+		enabled.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				currentState.setEnabled(chckbxCurrentEnabled.isSelected());
+				currentState.setEnabled(enabled.isSelected());
 			}
 		});
 		
@@ -209,14 +142,14 @@ public class CurrentTab extends JPanel {
 		txtConductance.setBounds(230, 105, 86, 20);
 		txtConductance.setColumns(10);
 		
-		chckbxIncludeCurrent = new JCheckBox("Include in simulation plots");
-		chckbxIncludeCurrent.addActionListener(new ActionListener() {
+		includeInPlots = new JCheckBox("Include in simulation plots");
+		includeInPlots.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				currentState.setDoPlots(chckbxIncludeCurrent.isSelected());
+				currentState.setDoPlots(includeInPlots.isSelected());
 			}
 		});
-		chckbxIncludeCurrent.setBounds(142, 19, 172, 23);
-		chckbxIncludeCurrent.setSelected(true);
+		includeInPlots.setBounds(142, 19, 172, 23);
+		includeInPlots.setSelected(true);
 		
 		JButton btnNewGate = new JButton("New gate");
 		btnNewGate.addActionListener(new ActionListener() {
@@ -236,15 +169,15 @@ public class CurrentTab extends JPanel {
 		});
 		btnRenameCurrent.setBounds(94, 360, 71, 23);
 		
-		txtrCurrentNotes = new JEditorPane();
-		txtrCurrentNotes.addFocusListener(new FocusAdapter() {
+		notes = new JEditorPane();
+		notes.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent arg0) {
-				currentState.setNotes(txtrCurrentNotes.getText());
+				currentState.setNotes(notes.getText());
 			}
 		});
-		txtrCurrentNotes.setBounds(76, 151, 238, 153);
-		txtrCurrentNotes.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
+		notes.setBounds(76, 151, 238, 153);
+		notes.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		
 		JLabel lblNotes = new JLabel("Notes");
 		lblNotes.setBounds(21, 154, 44, 15);
@@ -257,10 +190,10 @@ public class CurrentTab extends JPanel {
 		add(txtReversal);
 		add(txtConductance);
 		add(btnNewGate);
-		add(chckbxCurrentEnabled);
-		add(chckbxIncludeCurrent);
+		add(enabled);
+		add(includeInPlots);
 		add(lblNotes);
-		add(txtrCurrentNotes);
+		add(notes);
 		add(gatePane);
 	}
 

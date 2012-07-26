@@ -1,4 +1,4 @@
-package modelBuild;
+package modelState;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+
+import modelView.Expression;
+import modelView.ModelDesignerView;
+import modelView.PopupHelper;
 
 import solving.ClampMode;
 import solving.SolverType;
@@ -265,10 +269,11 @@ public class AppState {
 			int N = currentList.size();
 			for(int i=0; i<N; i++) {
 				CurrentState c = currentList.get(i); 
-				if( c instanceof HHCurrentState )
-					ui.restoreTab(c);
-				else
-					c.setUI(null);
+//				if( c instanceof HHCurrentState )
+				c.restore(ui);
+//					ui.restoreTab(c);
+//				else
+//					c.setUI(null);
 			}
 		} catch (ClassNotFoundException e) {
 			PopupHelper.fatalException("Logic error loading save file", e);

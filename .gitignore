@@ -1,13 +1,12 @@
-bin
+bin/
 *.pdf
 *.png
-war
-.settings
+war/
+.settings/
 *.wmw
 *.class
 *.jar
 *.war
 *.ear
 *.mdl
-antlr-generated
-
+antlr-generated/

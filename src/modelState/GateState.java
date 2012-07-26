@@ -1,6 +1,9 @@
-package modelBuild;
+package modelState;
 
 import java.io.Serializable;
+
+import modelView.Expression;
+import modelView.GateTab;
 
 import physicalObjects.HHCurrent;
 import physicalObjects.HHGate;
@@ -20,14 +23,15 @@ public class GateState implements Serializable {
 	private transient HHGate  physicalGate;
 	private transient HHCurrent physicalCurrent;
 	
-	public GateState(GateTab ui, HHCurrentState owningCurrent, Expression tau, Expression inf, Expression alpha, Expression beta) {
+	public GateState(GateTab ui, CurrentState owningCurrent, Expression tau, Expression inf, Expression alpha, Expression beta) {
 		this.tau   = tau;
 		this.inf   = inf;
 		this.alpha = alpha;
 		this.beta  = beta;
 		this.name = ui.getName();
+		this.physicalCurrent = (HHCurrent) owningCurrent.getPhysicalCurrent();
 		
-		physicalGate = new HHGate(owningCurrent.getPhysicalCurrent(), tau, inf, alpha, beta);
+		physicalGate = new HHGate(physicalCurrent, tau, inf, alpha, beta);
 		setExponent(1);
 		setEnabled(true);
 	}

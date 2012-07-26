@@ -20,7 +20,7 @@ import org.apache.commons.math3.ode.sampling.StepInterpolator;
 import plotting.ODESolutionPlotter;
 
 import expressionEvaluator.ParseException;
-import modelBuild.AppState;
+import modelState.AppState;
 
 public class Solver implements Runnable {
 

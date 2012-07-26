@@ -1,20 +1,32 @@
 package physicalObjects;
 
-public class StepCurrent extends StimCurrent {
+import expressionEvaluator.ParseException;
+import modelView.Expression;
 
-	private double startTime;
-	private double endTime;
+public class StepCurrent extends StimCurrent {
+	
+	private Expression startE;
+	private Expression endE;
+	private Expression stepE;
+	
+	private double start;
+	private double end;
 	private double step;
 	
-	public StepCurrent(double startTime, double endTime, double step) {
+	public StepCurrent(Expression startE, Expression endE, Expression stepE) {
 		super("Step current");
-		this.startTime = startTime;
-		this.endTime = endTime;
-		this.step = step;
+		this.startE = startE;
+		this.endE = endE;
+		this.stepE = stepE;
 	}
 
 	public double I(double t) {
-		return this.startTime<=t && t<=this.endTime ? step : 0;
+		return this.start<=t && t<=this.end ? step : 0;
 	}
-
+	
+	public void initialise() throws ParseException {
+		start = startE.eval();
+		end = endE.eval();
+		step = stepE.eval();		
+	}
 }
