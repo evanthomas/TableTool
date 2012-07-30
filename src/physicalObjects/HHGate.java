@@ -117,8 +117,26 @@ public class HHGate {
 		tauTable = t;
 	}
 	
-	public double[][] getTauTable() throws ParseException { genTauTable(); return tauTable; }
-	public double[][] getInfTable() throws ParseException { genInfTable(); return infTable; }
+	public double[] getTauTable() throws ParseException { 
+		genTauTable();
+		double x[] = new double[numEntries];
+		for(int i=0; i<numEntries; i++) x[i] = tauTable[0][i];
+		return x;
+	}
+
+	public double[] getInfTable() throws ParseException {
+		genInfTable();
+		double x[] = new double[numEntries];
+		for(int i=0; i<numEntries; i++) x[i] = infTable[0][i];
+		return x;
+	}
+
+	public double[] getVoltage() throws ParseException {
+		genInfTable();
+		double v[] = new double[numEntries];
+		for(int i=0; i<numEntries; i++) v[i] = infTable[1][i];
+		return v;
+	}
 	
 	public void setExponent(int e) { this.exponent = e; }
 

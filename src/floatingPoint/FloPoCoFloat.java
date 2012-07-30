@@ -1,15 +1,42 @@
 package floatingPoint;
 
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.Random;
 
 // Convert a java double to a bit representation of a FloCoPro float
-public class FloPoCoFloat {
+public class FloPoCoFloat implements Iterator<Boolean> {
 
 	private BitSet bitRepresentation;
 	private double value;
 	private int exponentWidth;
 	private int mantissaWidth;
+	private static Random r;
+	
+	static {
+		r = new Random();
+	}
+	
+	public FloPoCoFloat(int exponentWidth, int mantissaWidth) throws FloPoCoException {
+		bitRepresentation = new BitSet(exponentWidth+mantissaWidth+3);
+		this.exponentWidth = exponentWidth;
+		this.mantissaWidth = mantissaWidth;
+		
+		// Random 
+		double m = r.nextDouble();
+		// exponent 2^-9<e<2^9 (not all java doubles are supported)
+		int e = r.nextInt(1<<10)-(1<<9);
+		// sign
+		int s = r.nextInt(2);
+		value = m;
+		if( e > 0)
+			for(int j=0; j<e; j++)  value *= 2;
+		else
+			for(int j=0; j<-e; j++) value /= 2;
+		value *= (2*s-1);
+		
+		convertFromDouble();
+	}
 	
 	public FloPoCoFloat(double value, int exponentWidth, int mantissaWidth) throws FloPoCoException {
 		bitRepresentation = new BitSet(exponentWidth+mantissaWidth+3);
@@ -71,15 +98,16 @@ public class FloPoCoFloat {
 			value /= 2;
 		}
 		int biased_exponent = exponent + (1<<(exponentWidth-1)) - 1;
-		if( biased_exponent < 0 ) throw new FloPoCoException("underflow");
-		if( biased_exponent >= 1<<exponentWidth ) throw new FloPoCoException("overflow");
+		
+		if( biased_exponent < 0 ) throw new FloPoCoException("underflow - format does not support all java doubles");
+		if( biased_exponent >= 1<<exponentWidth ) throw new FloPoCoException("should not happen - overflow");
 		
 		for(int i=exponentWidth+2; i>=3; i-- ) {
 			bitRepresentation.set(i, biased_exponent%2==1);
 			biased_exponent >>= 1;
 		}
 		
-		value--;
+		value--; // take off implied leading 1
 		for(int i=0; i<mantissaWidth; i++ ) {
 			boolean b;
 			value *= 2;
@@ -140,8 +168,12 @@ public class FloPoCoFloat {
 			if( bit(i) ) exp++;
 		}
 		exp -= (1<<(exponentWidth-1)) - 1;
+
+		if( exp< 0 )
+			for(int i=0; i<-exp; i++) x /= 2;
+		else
+			for(int i=0; i<exp; i++)  x *= 2;
 		
-		x *= 1L<<exp;
 		x *= sign;
 		
 		return x;
@@ -156,19 +188,55 @@ public class FloPoCoFloat {
 	
 	public static void main(String[] args) {
 		Random r = new Random();
+		double m, x = 0, z = 0, w = 0;
+		FloPoCoFloat y = null;
+		int s, e;
 		try {
-			for(int i=0; i<10000000; i++) {
-				double x = r.nextDouble()+r.nextInt();
-				FloPoCoFloat y = new FloPoCoFloat(x, 11, 53);
-				double z = y.toDouble();
-				double w = x-z;
-				if( w!=0 )
-					System.out.println(x+"  "+y+"  "+w);
+			for(int i=0; i<1000000; i++) {
+				// mantissa 0<=x<1
+				m = r.nextDouble();
+				// exponent 2^-9<e<2^9 (not all java doubles are supported)
+				e = r.nextInt(1<<10)-(1<<9);
+				// sign
+				s = r.nextInt(2);
+				x = m;
+				if( e > 0)
+					for(int j=0; j<e; j++)  x *= 2;
+				else
+					for(int j=0; j<-e; j++) x /= 2;
+				x *= (2*s-1);
+				y = new FloPoCoFloat(x, 11, 53);
+				z = y.toDouble();
+				w = x-z;
+				if( w!=0 ) throw new FloPoCoException("Conversion fail.");
 			}
-		} catch (FloPoCoException e) {
-			System.out.println(e.getMessage());
+			System.out.println("success.");
+		} catch (FloPoCoException ex) {
+			System.out.println(x+"  "+y+"  "+z+"  "+w);
+			System.out.println(ex.getMessage());
 		}
-		System.out.println("done.");
+	}
+
+	// Iterator interface
+	private int indx;
+	
+	public Iterator<Boolean> iterator() {
+		indx = 0;
+	    return this;
+	}
+	@Override
+	public boolean hasNext() {
+		return indx<mantissaWidth+exponentWidth+3;
+	}
+
+	@Override
+	public Boolean next() {
+		return new Boolean(bit(indx++));
+	}
+
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException();
 	}
 	
 }

@@ -1,3 +1,4 @@
+antlr\-generated
 bin/
 *.pdf
 *.png
@@ -9,4 +10,3 @@ war/
 *.war
 *.ear
 *.mdl
-antlr-generated/

@@ -3,18 +3,25 @@ package modelView;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
-public class ModelFileFilter extends FileFilter {
+public class TableToolFileFilter extends FileFilter {
 
 
+	private String extension;
+	private String description;
+	
+	public TableToolFileFilter(String extension, String description) {
+		this.extension = extension;
+		this.description = description;
+	}
 	@Override
 	public boolean accept(File f) {
 		if (f.isDirectory()) {
 			return true;
 		}
 
-		String extension = getExtension(f);
-		if (extension != null) {
-			if (extension.equals("wmw")) {
+		String ext = getExtension(f);
+		if (ext != null) {
+			if (ext.equals(extension)) {
 				return true;
 			} else {
 				return false;
@@ -37,7 +44,7 @@ public class ModelFileFilter extends FileFilter {
 	
 	@Override
 	public String getDescription() {
-		return "*.wmw model files";
+		return description;
 	}
 
 }

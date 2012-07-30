@@ -52,6 +52,9 @@ public class ModelDesignerView extends JFrame {
 	
 	private JFileChooser modelFileChooser;
 	File modelFile;
+	
+	private JFileChooser tableFileChooser;
+	
 	private JComboBox solver;
 	private JTextField tolerance;
 	private JTextField capacitance;
@@ -69,8 +72,13 @@ public class ModelDesignerView extends JFrame {
 		initialize();
 		
 		modelFileChooser = new JFileChooser();
-		modelFileChooser.addChoosableFileFilter(new ModelFileFilter());
+		modelFileChooser.addChoosableFileFilter(new TableToolFileFilter("wmw", "*.wmw model files"));
 		modelFileChooser.setCurrentDirectory(new File("."));
+		modelFile = null;
+		
+		tableFileChooser = new JFileChooser();
+		tableFileChooser.addChoosableFileFilter(new TableToolFileFilter("tbl", "*.tbl table files"));
+		tableFileChooser.setCurrentDirectory(new File("."));
 	
 		AppState.setvHi(new Expression(tableHighVoltage));
 		AppState.getvHiEH().setString("100");
@@ -146,6 +154,7 @@ public class ModelDesignerView extends JFrame {
 		menuBar.add(mnFile);
 		
 		JMenuItem mntmNew = new JMenuItem("New");
+		mntmNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
 		mntmNew.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				reset();
@@ -154,6 +163,7 @@ public class ModelDesignerView extends JFrame {
 		mnFile.add(mntmNew);
 		
 		JMenuItem mntmOpen = new JMenuItem("Open ...");
+		mntmOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
 		mntmOpen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int returnVal = modelFileChooser.showOpenDialog(ModelDesignerView.this);
@@ -174,8 +184,14 @@ public class ModelDesignerView extends JFrame {
 		JMenuItem mntmSaveCtrls = new JMenuItem("Save");
 		mntmSaveCtrls.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				if( modelFile==null ) {
+					int returnVal = modelFileChooser.showSaveDialog(ModelDesignerView.this);
+
+					if (returnVal != JFileChooser.APPROVE_OPTION) return;
+					modelFile = modelFileChooser.getSelectedFile();					
+				}
 				try {
-					AppState.save(new File("x.wmw"));
+					AppState.save(modelFile);
 				} catch (IOException ex) {
 					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot save - "+ex.getMessage());
 				}
@@ -200,13 +216,8 @@ public class ModelDesignerView extends JFrame {
 		});
 		mnFile.add(mntmSaveAs);
 		
-		JMenuItem mntmCompile = new JMenuItem("Compile");
-		mnFile.add(mntmCompile);
-		
-		JMenuItem mntmClose = new JMenuItem("Close");
-		mnFile.add(mntmClose);
-		
 		JMenuItem mntmExit = new JMenuItem("Exit");
+		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
 		mntmExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				System.exit(0);
@@ -238,6 +249,28 @@ public class ModelDesignerView extends JFrame {
 		
 		JMenuItem mntmRestart = new JMenuItem("Restart");
 		mnSimulate.add(mntmRestart);
+		
+		JMenu mnDynamicclamp = new JMenu("DynamicClamp");
+		menuBar.add(mnDynamicclamp);
+		
+		JMenuItem mntmGenerateTables = new JMenuItem("Generate tables");
+		mntmGenerateTables.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int returnVal = tableFileChooser.showSaveDialog(ModelDesignerView.this);
+
+				if (returnVal != JFileChooser.APPROVE_OPTION) return;
+				File tableFile = tableFileChooser.getSelectedFile();
+				try {
+					AppState.generateTables(tableFile);
+				} catch (ParseException ex) {
+					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot generate tables - "+ex.getMessage());
+				} catch (IOException ex) {
+					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot save tables - "+ex.getMessage());
+				}
+			}
+		});
+		mntmGenerateTables.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_MASK));
+		mnDynamicclamp.add(mntmGenerateTables);
 		
 		JPanel globalExpressionPanel = new JPanel();
 		globalExpressionPanel.setBounds(518, 11, 227, 306);
@@ -557,5 +590,4 @@ public class ModelDesignerView extends JFrame {
 		});
 		getContentPane().add(CurrentTabs);
 	}
-
 }

@@ -8,6 +8,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import physicalObjects.HHCurrent;
+import physicalObjects.HHGate;
+
 import modelView.Expression;
 import modelView.ModelDesignerView;
 import modelView.PopupHelper;
@@ -15,6 +18,8 @@ import modelView.PopupHelper;
 import solving.ClampMode;
 import solving.SolverType;
 import expressionEvaluator.ParseException;
+import floatingPoint.FloPoCoException;
+import floatingPoint.FloPoCoTable;
 
 // Essentially a singleton object that contains the state of the application
 public class AppState {
@@ -269,16 +274,33 @@ public class AppState {
 			int N = currentList.size();
 			for(int i=0; i<N; i++) {
 				CurrentState c = currentList.get(i); 
-//				if( c instanceof HHCurrentState )
 				c.restore(ui);
-//					ui.restoreTab(c);
-//				else
-//					c.setUI(null);
 			}
 		} catch (ClassNotFoundException e) {
 			PopupHelper.fatalException("Logic error loading save file", e);
 		}
 
 		in.close();
+	}
+
+	public static void generateTables(File tableFile) throws ParseException, IOException {
+		FileOutputStream f = new FileOutputStream(tableFile);
+		for(CurrentState c : currentList) {
+			if( ! (c instanceof HHCurrentState) ) continue;
+			HHCurrent hhc = (HHCurrent) c.getPhysicalCurrent();
+			for( HHGate g : hhc.getGateList()) {
+				try {
+					double []x = g.getInfTable();
+					FloPoCoTable ft = new FloPoCoTable(x);
+					for(Byte b : ft) f.write(b);
+					x = g.getTauTable();
+					ft = new FloPoCoTable(x);
+					for(Byte b : ft) f.write(b);
+				} catch (FloPoCoException ex) {
+					PopupHelper.fatalException("Floating point exception writing table file", ex);
+				}
+			}
+		}
+		f.close();
 	}
 }
