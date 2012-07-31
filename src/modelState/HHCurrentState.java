@@ -20,6 +20,10 @@ public class HHCurrentState extends CurrentState {
 	private Expression conductance;
 	private ArrayList<GateState> gates;
 
+	public ArrayList<GateState> getGates() {
+		return gates;
+	}
+
 	public HHCurrentState(CurrentTab ui, String name, Expression conductance, Expression reversal) {
 		super(ui, name);
 		this.reversal = reversal;

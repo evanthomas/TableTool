@@ -5,9 +5,10 @@ import java.util.Iterator;
 import java.util.Random;
 
 // Convert a java double to a bit representation of a FloCoPro float
-public class FloPoCoFloat implements Iterator<Boolean> {
+public class FloPoCoFloat extends BitSet implements Iterator<Boolean> {
 
-	private BitSet bitRepresentation;
+	private static final long serialVersionUID = 1L;
+
 	private double value;
 	private int exponentWidth;
 	private int mantissaWidth;
@@ -18,7 +19,7 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 	}
 	
 	public FloPoCoFloat(int exponentWidth, int mantissaWidth) throws FloPoCoException {
-		bitRepresentation = new BitSet(exponentWidth+mantissaWidth+3);
+		super(exponentWidth+mantissaWidth+3);
 		this.exponentWidth = exponentWidth;
 		this.mantissaWidth = mantissaWidth;
 		
@@ -39,7 +40,7 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 	}
 	
 	public FloPoCoFloat(double value, int exponentWidth, int mantissaWidth) throws FloPoCoException {
-		bitRepresentation = new BitSet(exponentWidth+mantissaWidth+3);
+		super(exponentWidth+mantissaWidth+3);
 		this.exponentWidth = exponentWidth;
 		this.mantissaWidth = mantissaWidth;
 		this.value = value;
@@ -47,7 +48,7 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 	}
 
 	public FloPoCoFloat(String value, int exponentWidth, int mantissaWidth) throws FloPoCoException {
-		bitRepresentation = new BitSet(exponentWidth+mantissaWidth+3);
+		super(exponentWidth+mantissaWidth+3);
 		this.exponentWidth = exponentWidth;
 		this.mantissaWidth = mantissaWidth;
 		this.value = Double.parseDouble(value);
@@ -66,27 +67,27 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 			throw new FloPoCoException("mantissa widths greater than 53 cannot be converted.");
 		
 		if( value == Double.NaN ) {
-			bitRepresentation.set(0, true);
-			bitRepresentation.set(1, true);
+			set(0, true);
+			set(1, true);
 			return;
 		}
 		
 		if( value == 0 ) return;
 
 		if( value < 0 ) {
-			bitRepresentation.set(2, true);
+			set(2, true);
 			value = - value;
 		}
 		
 		if( value == Double.NEGATIVE_INFINITY || value==Double.POSITIVE_INFINITY ) {
-			bitRepresentation.set(0, true);
-			bitRepresentation.set(1, false);
+			set(0, true);
+			set(1, false);
 			return;
 		}
 
 		// Normal numbers 
-		bitRepresentation.set(0, false);
-		bitRepresentation.set(1, true);
+		set(0, false);
+		set(1, true);
 	
 		int exponent = 0;
 		while( value < 1) {
@@ -103,7 +104,7 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 		if( biased_exponent >= 1<<exponentWidth ) throw new FloPoCoException("should not happen - overflow");
 		
 		for(int i=exponentWidth+2; i>=3; i-- ) {
-			bitRepresentation.set(i, biased_exponent%2==1);
+			set(i, biased_exponent%2==1);
 			biased_exponent >>= 1;
 		}
 		
@@ -116,7 +117,7 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 				value--;
 			} else
 				b = false;
-			bitRepresentation.set(i+3+exponentWidth, b);
+			set(i+3+exponentWidth, b);
 		}
 
 	}
@@ -148,16 +149,16 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 		double x = 1;
 		int sign = 0;
 		
-		if( !bitRepresentation.get(0) && !bitRepresentation.get(1) ) return 0;
-		if(  bitRepresentation.get(0) &&  bitRepresentation.get(1) ) return Double.NaN;
-		if(  bitRepresentation.get(0) && !bitRepresentation.get(1) ) return Double.POSITIVE_INFINITY;
+		if( !get(0) && !get(1) ) return 0;
+		if(  get(0) &&  get(1) ) return Double.NaN;
+		if(  get(0) && !get(1) ) return Double.POSITIVE_INFINITY;
 		
-		sign = bit(2) ? -1 : 1;  
+		sign = get(2) ? -1 : 1;  
 		
 		// Fraction
 		for(int i=exponentWidth+3; i<exponentWidth+mantissaWidth+3; i++) {
 			x *= 2;
-			if( bit(i) ) x++;
+			if( get(i) ) x++;
 		}
 		x /= (1L << mantissaWidth);
 		
@@ -165,7 +166,7 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 		int exp = 0;
 		for(int i=3; i<exponentWidth+3; i++) {
 			exp <<= 1;
-			if( bit(i) ) exp++;
+			if( get(i) ) exp++;
 		}
 		exp -= (1<<(exponentWidth-1)) - 1;
 
@@ -179,10 +180,8 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 		return x;
 	}
 	
-	private boolean bit(int i) { return bitRepresentation.get(i); }
-	
 	private char bitToChar(int i) { 
-		boolean b = bitRepresentation.get(i);
+		boolean b = get(i);
 		return b ? '1' : '0'; 
 	}
 	
@@ -231,7 +230,7 @@ public class FloPoCoFloat implements Iterator<Boolean> {
 
 	@Override
 	public Boolean next() {
-		return new Boolean(bit(indx++));
+		return new Boolean(get(indx++));
 	}
 
 	@Override

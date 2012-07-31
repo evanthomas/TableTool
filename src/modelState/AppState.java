@@ -43,6 +43,7 @@ public class AppState {
 	private static ArrayList<CurrentState> currentList;
 	
 	private static final int saveFileVersion = 1;
+	private static final int tableFileVersion = 1;
 
 	static {
 		currentList = new ArrayList<CurrentState>();
@@ -283,24 +284,83 @@ public class AppState {
 		in.close();
 	}
 
+	static FileOutputStream tableFileStream;
 	public static void generateTables(File tableFile) throws ParseException, IOException {
-		FileOutputStream f = new FileOutputStream(tableFile);
-		for(CurrentState c : currentList) {
-			if( ! (c instanceof HHCurrentState) ) continue;
-			HHCurrent hhc = (HHCurrent) c.getPhysicalCurrent();
-			for( HHGate g : hhc.getGateList()) {
-				try {
-					double []x = g.getInfTable();
-					FloPoCoTable ft = new FloPoCoTable(x);
-					for(Byte b : ft) f.write(b);
-					x = g.getTauTable();
-					ft = new FloPoCoTable(x);
-					for(Byte b : ft) f.write(b);
-				} catch (FloPoCoException ex) {
-					PopupHelper.fatalException("Floating point exception writing table file", ex);
+		/*
+		 *    Table format is as follows:
+		 *    Field					Format		Length
+		 *    version				int			4
+		 *    Cm					float		5
+		 *    table low voltage		float		5
+		 *    table high value		float		5
+		 *    # table entries		int			4
+		 *    number of currents	int			4
+		 *    
+		 *    (repeated for each current)
+		 *    Gmax					float		5
+		 *    Er					float		5
+		 *    number of gates		int			4
+		 *    
+		 *    (repeated for each gate)
+		 *    exponent				int			4
+		 *    inf table				float		5*(# table entries)
+		 *    tau table				float		5*(# table entries)
+		 *    
+		 */
+		
+		tableFileStream = new FileOutputStream(tableFile);
+		
+		try {
+			
+			writeInt(tableFileVersion);
+			
+			writeFloat(getCapacitance());
+			
+			writeFloat(getvLo());
+			writeFloat(getvHi());
+			writeInt(getNumEntries());
+
+			int currentCnt = 0;
+			for(CurrentState c : currentList) {
+				if( c instanceof HHCurrentState ) currentCnt++;
+			}
+			writeInt(currentCnt);
+			
+			for(CurrentState c : currentList) {
+				if( ! (c instanceof HHCurrentState) ) continue;
+				HHCurrent hhc = (HHCurrent) c.getPhysicalCurrent();
+				
+				writeInt(hhc.getGateList().size());
+				for( HHGate g : hhc.getGateList()) {
+					writeInt(g.getExponent());
+					writeFloatTable(g.getInfTable());
+					writeFloatTable(g.getTauTable());
 				}
 			}
+			
+		} catch (FloPoCoException ex) {
+			PopupHelper.fatalException("Floating point exception writing table file", ex);
 		}
-		f.close();
+		
+		tableFileStream.close();
+	}
+	
+	private static void writeInt(int i) throws IOException {
+		tableFileStream.write(intToLittleEndianByteArray(i));
+	}
+	private static void writeFloatTable(double []x) throws IOException, FloPoCoException {
+		FloPoCoTable ft    = new FloPoCoTable(x);
+		for(Byte b : ft) tableFileStream.write(b);
+	}
+	private static void writeFloat(double f) throws IOException, FloPoCoException {
+		writeFloatTable(new double[] {f});
+	}
+	public static byte[] intToLittleEndianByteArray(int value) {
+		return new byte[] {
+				(byte)value,
+				(byte)(value >>> 8),
+				(byte)(value >>> 16),
+				(byte)(value >>> 24)
+				};
 	}
 }

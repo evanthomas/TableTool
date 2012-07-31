@@ -100,15 +100,31 @@ public class Solver implements Runnable {
 
 	public void run() {
 		integrator.integrate(ccdf, 0.0, yinit, rundur, state);
-		new ODESolutionPlotter("Voltage", time, getVoltage());
+		
+		plotVoltage();
+//		plotCurrent();
+//		plotGates();
 	}
 	
-	private double[] getVoltage() {
+	private void plotVoltage() {
+		if( !AppState.doVoltagePlots() ) return;
+		double t[] = new double[time.size()];
+		for(int i=0; i<time.size(); i++) {
+			t[i] = time.get(i);
+		}
+		new ODESolutionPlotter("Voltage", t, getVoltage(), new String[] {"voltage"});
+	}
+	
+	private void plotCurrent() {
+		
+	}
+	
+	private double[][] getVoltage() {
 		int n = accumulatedState.size();
-		double[] voltage = new double[n];
+		double[][] voltage = new double[1][n];
 		int N = ccdf.getDimension();
 		for(int i=0; i<n; i++) {
-			voltage[i] = accumulatedState.get(i)[N-1];
+			voltage[0][i] = accumulatedState.get(i)[N-1];
 		}
 		return voltage;
 	}

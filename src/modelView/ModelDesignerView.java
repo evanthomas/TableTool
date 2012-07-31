@@ -30,6 +30,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import modelState.AppState;
+import modelState.CurrentState;
+import modelState.HHCurrentState;
+import modelState.GateState;
 import expressionEvaluator.ParseException;
 
 import java.awt.event.FocusAdapter;
@@ -93,7 +96,7 @@ public class ModelDesignerView extends JFrame {
 		AppState.setRundur(new Expression(rundur));
 		AppState.getRundurEH().setString("100");
 		
-		solver.setSelectedItem(SolverType.RungeKutta);
+		solver.setSelectedItem(SolverType.Euler);
 	}
 	
 	public CurrentTab addNewHHTab() {
@@ -133,6 +136,18 @@ public class ModelDesignerView extends JFrame {
 	public void setDoVoltagePlots(boolean s)  { chckbxVoltage.setSelected(s);  }
 	public void setDoGatePlots(boolean s)     { chckbxGates.setSelected(s);    }
 	public void setDoStimulusPlots(boolean s) { chckbxStimulus.setSelected(s); }
+
+	protected void toggleGatePlots(boolean b) {
+		for( CurrentState c : AppState.getCurrentList() ) {
+			if( !(c instanceof HHCurrentState) ) continue;
+			HHCurrentState hhc = (HHCurrentState)c;
+			for( GateState g : hhc.getGates() ) g.setDoPlots(b);
+		}
+	}
+
+	protected void toggleCurrentPlots(boolean b) {
+		for( CurrentState c : AppState.getCurrentList() ) c.setDoPlots(b);
+	}
 
 	public JTabbedPane getCurrentTabs() {
 		return CurrentTabs;
@@ -468,15 +483,35 @@ public class ModelDesignerView extends JFrame {
 		chckbxStimulus.setBounds(139, 42, 78, 23);
 		
 		JButton btnAllGatesOn = new JButton("All gates on");
+		btnAllGatesOn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				toggleGatePlots(true);
+			}
+		});
 		btnAllGatesOn.setBounds(12, 67, 101, 23);
 		
 		JButton btnAllCurrentsOn = new JButton("All currents on");
+		btnAllCurrentsOn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				toggleCurrentPlots(true);
+			}
+		});
 		btnAllCurrentsOn.setBounds(125, 67, 121, 23);
 		
 		JButton btnAllGatesOff = new JButton("All gates off");
+		btnAllGatesOff.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				toggleGatePlots(false);
+			}
+		});
 		btnAllGatesOff.setBounds(12, 96, 101, 23);
 		
 		JButton btnAllCurrentsOff = new JButton("All currents off");
+		btnAllCurrentsOff.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				toggleCurrentPlots(false);
+			}
+		});
 		btnAllCurrentsOff.setBounds(125, 96, 121, 23);
 		
 		JRadioButton rdbtnCurrent = new JRadioButton("Current");

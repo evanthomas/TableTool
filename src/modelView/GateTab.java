@@ -43,7 +43,12 @@ public class GateTab extends JPanel {
 	private JTextPane txtpnBeta;
 	private HHCurrentState owningCurrent;
 	private JSpinner spinner;
+	private JCheckBox chckbxEnabled;
+	private JCheckBox chckbxIncludeGateInPlots;
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public GateTab(JTabbedPane GateTabPanel, CurrentTab owningPanel, HHCurrentState owningCurrent) {
 		super();
 		this.GateTabPanel = GateTabPanel;
@@ -83,6 +88,14 @@ public class GateTab extends JPanel {
 		
 		owningCurrent = (HHCurrentState) owningPanel.getHHCurrentState();
 	}
+	
+	public void setDoPlots(boolean e) {
+		chckbxIncludeGateInPlots.setSelected(e);
+	}
+	
+	public void setEnabled(boolean e) {
+		chckbxEnabled.setSelected(e);
+	}
 
 	public void setName(String newname) {
 		super.setName(newname);
@@ -112,7 +125,7 @@ public class GateTab extends JPanel {
 	private void initialize() {
 		GateTabPanel.addTab("gate", null, this, null);
 		
-		final JCheckBox chckbxEnabled = new JCheckBox("Enabled");
+		chckbxEnabled = new JCheckBox("Enabled");
 		chckbxEnabled.setBounds(8, 12, 81, 23);
 		chckbxEnabled.setSelected(true);
 		chckbxEnabled.addChangeListener(new ChangeListener() {
@@ -188,7 +201,7 @@ public class GateTab extends JPanel {
 		txtpnBeta.setBounds(173, 258, 153, 40);
 		txtpnBeta.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		
-		JCheckBox chckbxIncludeGateInPlots = new JCheckBox("Include in simulation plots");
+		chckbxIncludeGateInPlots = new JCheckBox("Include in simulation plots");
 		chckbxIncludeGateInPlots.setBounds(102, 12, 180, 23);
 		chckbxIncludeGateInPlots.setSelected(true);
 		

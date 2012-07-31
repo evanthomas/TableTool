@@ -20,13 +20,22 @@ import org.jfree.data.xy.XYDataset;
 
 public class ODESolutionPlotter extends JFrame {
 
-	private static final long serialVersionUID = -5442298555017545443L;
+	private static final long serialVersionUID = 1L;
 
-	public ODESolutionPlotter(String plotTitle, ArrayList<Double> t, double[] voltage) {
+	public ODESolutionPlotter(String plotTitle, double[] t, double[][] ODEoutput, String [] legend) {
 		super("Solution plot");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ModelDesignerView.class.getResource("/images/whatmeworry.jpg")));
 		
-		XYDataset data = createData(t, voltage, "voltage");
+		double x[][] = new double[2][t.length];
+		DefaultXYDataset data = new DefaultXYDataset();
+
+		for(int i=0; i<legend.length; i++) {
+			for(int j=0; j<t.length; j++) {
+				x[1][j] = t[j];
+				x[0][j] = ODEoutput[i][j];
+			}
+			data.addSeries(legend[i], x);
+		}
 		
         // based on the dataset we create the chart
         JFreeChart chart = createXYPlot(data, plotTitle);
@@ -44,17 +53,6 @@ public class ODESolutionPlotter extends JFrame {
         // Show panel
         pack();
         setVisible(true);
-	}
-
-	private XYDataset createData(ArrayList<Double> t, double[] y, String lstr) {
-		DefaultXYDataset data = new DefaultXYDataset();
-		double[][] dataTable = new double[2][y.length];
-		for(int i=0; i<y.length; i++) {
-			dataTable[0][i] = y[i];
-			dataTable[1][i] = t.get(i);
-		}
-		data.addSeries(lstr, dataTable);
-		return data;
 	}
 	
 	private JFreeChart createXYPlot(XYDataset data, String plotTitle) {

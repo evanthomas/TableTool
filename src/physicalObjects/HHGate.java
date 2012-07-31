@@ -21,6 +21,7 @@ public class HHGate {
 	private double state;
 	private int exponent;
 	private boolean enabled;
+	private boolean includeInPlots;
 	private HHCurrent owner;
 	
 	public HHGate(HHCurrent owner, Expression tauFn, Expression infFn, Expression alphaFn, Expression betaFn) {
@@ -32,6 +33,7 @@ public class HHGate {
 		this.owner = owner;
 		this.owner.addGate(this);
 		exponent = 1;
+		this.includeInPlots = true;
 	}
 
 	public void initialise() throws ParseException {
@@ -139,7 +141,12 @@ public class HHGate {
 	}
 	
 	public void setExponent(int e) { this.exponent = e; }
-
+	public int getExponent() { return exponent; }
+	
 	public void setEnabled(boolean e) { this.enabled = e; }
-	public boolean enabled() { return enabled; } 
+	public boolean enabled() { return enabled; }
+
+	public void setDoPlots(boolean e) {
+		includeInPlots = e;
+	} 
 }

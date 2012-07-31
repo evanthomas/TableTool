@@ -28,6 +28,7 @@ public abstract class CurrentState implements Serializable {
 	public void setEnabled(boolean e) {
 		this.enabled = e;
 		physicalCurrent.setEnabled(e);
+		ui.setEnabled(e);
 	}
 	
 	public void setNotes(String s) { this.notes = s; }
@@ -35,6 +36,7 @@ public abstract class CurrentState implements Serializable {
 	public void setDoPlots(boolean e) {
 		this.doPlots = e;
 		physicalCurrent.setIncludeInPlots(e);
+		ui.setDoPlots(e);
 	}
 	
 	public Current getPhysicalCurrent() {
