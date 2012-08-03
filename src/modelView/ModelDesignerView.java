@@ -1,48 +1,46 @@
 package modelView;
 
-import javax.swing.JFrame;
 import java.awt.Toolkit;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JTabbedPane;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.KeyStroke;
-import java.awt.event.KeyEvent;
-import java.awt.event.InputEvent;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.border.EtchedBorder;
-import javax.swing.AbstractButton;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JRadioButton;
-import javax.swing.JCheckBox;
-import javax.swing.ButtonGroup;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-
-import modelState.AppState;
-import modelState.CurrentState;
-import modelState.HHCurrentState;
-import modelState.GateState;
-import expressionEvaluator.ParseException;
-
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
+
+import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+
+import modelState.AppState;
+import modelState.CurrentState;
+import modelState.GateState;
+import modelState.HHCurrentState;
 import solving.ClampMode;
 import solving.Solver;
 import solving.SolverType;
+import expressionEvaluator.ParseException;
 
 public class ModelDesignerView extends JFrame {
 
@@ -69,7 +67,6 @@ public class ModelDesignerView extends JFrame {
 	private JCheckBox chckbxCurrents;
 	private JCheckBox chckbxGates;
 	private JCheckBox chckbxVoltage;
-	private JCheckBox chckbxStimulus;
 		
 	public ModelDesignerView() {
 		initialize();
@@ -84,17 +81,24 @@ public class ModelDesignerView extends JFrame {
 		tableFileChooser.setCurrentDirectory(new File("."));
 	
 		AppState.setvHi(new Expression(tableHighVoltage));
-		AppState.getvHiEH().setString("100");
+		tableHighVoltage.getDocument().addDocumentListener(new ExpressionListener(AppState.getvHiEH()));
 		AppState.setvLo(new Expression(tableLowVoltage));
-		AppState.getvLoEH().setString("-100");
+		tableLowVoltage.getDocument().addDocumentListener(new ExpressionListener(AppState.getvLoEH()));
 		AppState.setNumEntries(new Expression(tableNumberEntries));
-		AppState.getNumEntriesEH().setString("16384");
+		tableNumberEntries.getDocument().addDocumentListener(new ExpressionListener(AppState.getNumEntriesEH()));
 		AppState.setTolerance(new Expression(tolerance));
-		AppState.getToleranceEH().setString("0.01");
+		tolerance.getDocument().addDocumentListener(new ExpressionListener(AppState.getToleranceEH()));
 		AppState.setCapacitance(new Expression(capacitance));
-		AppState.getCapacitanceEH().setString("2");
+		capacitance.getDocument().addDocumentListener(new ExpressionListener(AppState.getCapacitanceEH()));
 		AppState.setRundur(new Expression(rundur));
-		AppState.getRundurEH().setString("100");
+		rundur.getDocument().addDocumentListener(new ExpressionListener(AppState.getRundurEH()));
+
+		//		AppState.getNumEntriesEH().setString("16384");
+//		AppState.getToleranceEH().setString("0.01");
+//		AppState.getCapacitanceEH().setString("2");
+//		AppState.getRundurEH().setString("100");
+//		AppState.getvHiEH().setString("100");
+//		AppState.getvLoEH().setString("-100");
 		
 		solver.setSelectedItem(SolverType.Euler);
 	}
@@ -103,11 +107,10 @@ public class ModelDesignerView extends JFrame {
 		return new HHCurrentTab(CurrentTabs);
 	}
 	
-	public StepCurrentTab addNewStepTab() {
-		return new StepCurrentTab(CurrentTabs);
+	public StimCurrentTab addNewStimTab() {
+		return new StimCurrentTab(CurrentTabs);
 	}
 	
-
 	public void reset() {
 		CurrentTabs.removeAll();
 		
@@ -118,7 +121,6 @@ public class ModelDesignerView extends JFrame {
 		setDoCurrentPlots(true);
 		setDoVoltagePlots(true);
 		setDoGatePlots(true);
-		setDoStimulusPlots(true);
 	}
 
 	public void setSolver(SolverType s) { solver.setSelectedItem(s); }
@@ -135,7 +137,6 @@ public class ModelDesignerView extends JFrame {
 	public void setDoCurrentPlots(boolean s)  { chckbxCurrents.setSelected(s); }
 	public void setDoVoltagePlots(boolean s)  { chckbxVoltage.setSelected(s);  }
 	public void setDoGatePlots(boolean s)     { chckbxGates.setSelected(s);    }
-	public void setDoStimulusPlots(boolean s) { chckbxStimulus.setSelected(s); }
 
 	protected void toggleGatePlots(boolean b) {
 		for( CurrentState c : AppState.getCurrentList() ) {
@@ -191,6 +192,7 @@ public class ModelDesignerView extends JFrame {
 					AppState.restore(modelFile);
 				} catch (IOException ex) {
 					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot load save file - "+ex.getMessage());
+					ex.printStackTrace();
 				}
 			}
 		});
@@ -209,6 +211,7 @@ public class ModelDesignerView extends JFrame {
 					AppState.save(modelFile);
 				} catch (IOException ex) {
 					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot save - "+ex.getMessage());
+					ex.printStackTrace();
 				}
 			}
 		});
@@ -226,6 +229,7 @@ public class ModelDesignerView extends JFrame {
 					AppState.save(modelFile);
 				} catch (IOException ex) {
 					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot save - "+ex.getMessage());
+					ex.printStackTrace();
 				}
 			}
 		});
@@ -314,17 +318,6 @@ public class ModelDesignerView extends JFrame {
 		lblTolerancestepSize.setBounds(239, 49, 111, 16);
 		
 		tolerance = new JTextField();
-		tolerance.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				AppState.getToleranceEH().textFieldHandler(e);
-		}
-		});
-		tolerance.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AppState.getToleranceEH().textFieldHandler(e);
-			}
-		});
 		tolerance.setBounds(368, 47, 70, 20);
 		tolerance.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		
@@ -332,17 +325,6 @@ public class ModelDesignerView extends JFrame {
 		lblCellCapacitance.setBounds(16, 87, 118, 16);
 		
 		capacitance = new JTextField();
-		capacitance.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				AppState.getCapacitanceEH().textFieldHandler(e);
-			}
-		});
-		capacitance.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AppState.getCapacitanceEH().textFieldHandler(e);
-			}
-		});
 		capacitance.setBounds(144, 85, 70, 20);
 		capacitance.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 
@@ -354,17 +336,6 @@ public class ModelDesignerView extends JFrame {
 		lblRunDurationms.setBounds(240, 87, 101, 16);
 		
 		rundur = new JTextField();
-		rundur.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				AppState.getRundurEH().textFieldHandler(e);
-			}
-		});
-		rundur.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AppState.getRundurEH().textFieldHandler(e);
-			}
-		});
 		rundur.setBounds(368, 85, 70, 20);
 		rundur.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		
@@ -379,7 +350,7 @@ public class ModelDesignerView extends JFrame {
 		JButton btnNewStim = new JButton("New stimulus");
 		btnNewStim.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				addNewStepTab();
+				addNewStimTab();
 			}
 		});
 		btnNewStim.setBounds(368, 259, 118, 26);
@@ -402,47 +373,14 @@ public class ModelDesignerView extends JFrame {
 		lblNumberOfEntries.setBounds(12, 93, 112, 15);
 		
 		tableLowVoltage = new JTextField();
-		tableLowVoltage.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				AppState.getvLoEH().textFieldHandler(e);
-			}
-		});
-		tableLowVoltage.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AppState.getvLoEH().textFieldHandler(e);
-			}
-		});
 		tableLowVoltage.setBounds(120, 26, 60, 20);
 		tableLowVoltage.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
-		
+
 		tableHighVoltage = new JTextField();
-		tableHighVoltage.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				AppState.getvHiEH().textFieldHandler(e);
-			}
-		});
-		tableHighVoltage.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AppState.getvHiEH().textFieldHandler(e);
-			}
-		});
 		tableHighVoltage.setBounds(120, 57, 60, 20);
 		tableHighVoltage.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		
 		tableNumberEntries = new JTextField();
-		tableNumberEntries.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				AppState.getNumEntriesEH().textFieldHandler(e);
-			}
-		});
-		tableNumberEntries.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AppState.getNumEntriesEH().textFieldHandler(e);
-			}
-		});
 		tableNumberEntries.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		tableNumberEntries.setBounds(120, 90, 60, 20);
 		
@@ -472,15 +410,6 @@ public class ModelDesignerView extends JFrame {
 			}
 		});
 		chckbxGates.setBounds(16, 42, 74, 23);
-		
-		chckbxStimulus = new JCheckBox("Stimulus");
-		chckbxStimulus.setSelected(true);
-		chckbxStimulus.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AppState.setDoStimulusPlots(chckbxStimulus.isSelected());
-			}
-		});
-		chckbxStimulus.setBounds(139, 42, 78, 23);
 		
 		JButton btnAllGatesOn = new JButton("All gates on");
 		btnAllGatesOn.addActionListener(new ActionListener() {
@@ -550,7 +479,6 @@ public class ModelDesignerView extends JFrame {
 		plotOptionsPanel.add(btnAllCurrentsOn);
 		plotOptionsPanel.add(chckbxCurrents);
 		plotOptionsPanel.add(chckbxGates);
-		plotOptionsPanel.add(chckbxStimulus);
 		plotOptionsPanel.add(chckbxVoltage);
 		plotOptionsPanel.add(btnAllGatesOff);
 		plotOptionsPanel.add(btnAllCurrentsOff);
@@ -580,6 +508,15 @@ public class ModelDesignerView extends JFrame {
 		mainSettingsPanel.add(clampMode);
 		mainSettingsPanel.add(panel);
 		mainSettingsPanel.add(plotOptionsPanel);
+		
+		JButton btnNewButton = new JButton("close all");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				AppState.closeAllGraphs();
+			}
+		});
+		btnNewButton.setBounds(125, 42, 121, 23);
+		plotOptionsPanel.add(btnNewButton);
 		mainSettingsPanel.add(btnNewHHCurrent);
 		mainSettingsPanel.add(btnNewStim);
 		getContentPane().add(mainSettingsPanel);

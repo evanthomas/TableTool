@@ -9,10 +9,10 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import modelState.AppState;
 
-public class ModelDesignController {
+public class Main {
 
 	/**
-	 * Launch the window
+	 * The main main, man!
 	 */
 	public static void main(String[] args) {
 		// Set nice L&F
@@ -35,12 +35,15 @@ public class ModelDesignController {
 					ModelDesignerView window = new ModelDesignerView();
 					window.setVisible(true);
 					AppState.setUI(window);
-					AppState.restore(new File("simple muscle model.wmw"));
 				} catch (Exception e) {
 					PopupHelper.fatalException("Failed opening window", e);
+				}
+				try {
+					AppState.restore(new File("simple muscle model.wmw"));
+				} catch (IOException e) {
+					PopupHelper.errorMessage(null, "model file not found.");
 				}
 			}
 		});
 	}
-
 }

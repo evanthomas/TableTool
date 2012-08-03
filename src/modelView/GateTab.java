@@ -1,7 +1,11 @@
 package modelView;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -10,21 +14,13 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EtchedBorder;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JEditorPane;
-
-import expressionEvaluator.ParseException;
-
-import plotting.GatePlotter;
-
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import modelState.GateState;
 import modelState.HHCurrentState;
+import plotting.GatePlotter;
+import expressionEvaluator.ParseException;
 
 public class GateTab extends JPanel {
 	
@@ -58,9 +54,13 @@ public class GateTab extends JPanel {
 		GateTabPanel.setSelectedComponent(this);		
 
 		tau   = new Expression(txtpnTau);
+		txtpnTau.getDocument().addDocumentListener(new ExpressionListener(GateTab.this.tau));
 		inf   = new Expression(txtpnInf);
+		txtpnInf.getDocument().addDocumentListener(new ExpressionListener(GateTab.this.inf));
 		alpha = new Expression(txtpnAlpha);
+		txtpnAlpha.getDocument().addDocumentListener(new ExpressionListener(GateTab.this.alpha));
 		beta  = new Expression(txtpnBeta);
+		txtpnBeta.getDocument().addDocumentListener(new ExpressionListener(GateTab.this.beta));
 
 		this.owningCurrent = owningCurrent;
 		gateState = new GateState(this, owningCurrent, tau, inf, alpha, beta);
@@ -147,12 +147,6 @@ public class GateTab extends JPanel {
 		lblExponent.setBounds(236, 81, 53, 14);
 		
 		txtpnTau = new JTextPane();
-		txtpnTau.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				GateTab.this.tau.textFieldHandler(e);
-			}
-		});
 		txtpnTau.setBounds(8, 195, 153, 40);
 		txtpnTau.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		txtpnTau.setText("");
@@ -161,12 +155,6 @@ public class GateTab extends JPanel {
 		lblTaums.setBounds(61, 175, 57, 16);
 		
 		txtpnInf = new JTextPane();
-		txtpnInf.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				GateTab.this.inf.textFieldHandler(e);
-			}
-		});
 		txtpnInf.setBounds(173, 195, 153, 40);
 		txtpnInf.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		txtpnInf.setText("");
@@ -178,30 +166,23 @@ public class GateTab extends JPanel {
 		lblAlpha.setBounds(49, 239, 87, 16);
 		
 		txtpnAlpha = new JTextPane();
-		txtpnAlpha.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				GateTab.this.alpha.textFieldHandler(e);
-			}
-		});
 		txtpnAlpha.setBounds(8, 258, 153, 40);
 		txtpnAlpha.setText("");
 		txtpnAlpha.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
-		
+
 		JLabel lblBeta = new JLabel("beta (1/ms)");
 		lblBeta.setBounds(217, 239, 64, 16);
 		
 		txtpnBeta = new JTextPane();
-		txtpnBeta.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				GateTab.this.beta.textFieldHandler(e);
-			}
-		});
 		txtpnBeta.setBounds(173, 258, 153, 40);
 		txtpnBeta.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		
 		chckbxIncludeGateInPlots = new JCheckBox("Include in simulation plots");
+		chckbxIncludeGateInPlots.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				gateState.setDoPlots(chckbxIncludeGateInPlots.isSelected());
+			}
+		});
 		chckbxIncludeGateInPlots.setBounds(102, 12, 180, 23);
 		chckbxIncludeGateInPlots.setSelected(true);
 		

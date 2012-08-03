@@ -17,10 +17,14 @@ import org.apache.commons.math3.ode.nonstiff.ThreeEighthesIntegrator;
 import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
 
+import physicalObjects.Current;
+import physicalObjects.HHCurrent;
+import physicalObjects.HHGate;
 import plotting.ODESolutionPlotter;
 
 import expressionEvaluator.ParseException;
 import modelState.AppState;
+import modelState.CurrentState;
 
 public class Solver implements Runnable {
 
@@ -36,6 +40,7 @@ public class Solver implements Runnable {
 	double[] state;
 	private ArrayList<Double> time;
 	private ArrayList<double[]> accumulatedState;
+	private ArrayList<double[]> accumulatedCurrent;
 	
 	public Solver() throws ParseException {
 		SolverType method = AppState.getOdeMethod();
@@ -90,33 +95,137 @@ public class Solver implements Runnable {
 		        double[] y = interpolator.getInterpolatedState();
 		        time.add(t);
 		        accumulatedState.add(y.clone());
+		        accumulatedCurrent.add(ccdf.getCurrentCurrent().clone());
 		    }
 		};
+		
 		integrator.addStepHandler(stepHandler);
 		state = new double[ccdf.getDimension()];
 		time = new ArrayList<Double>();
 		accumulatedState = new ArrayList<double[]>();
+		accumulatedCurrent = new ArrayList<double[]>();
 	}
 
 	public void run() {
 		integrator.integrate(ccdf, 0.0, yinit, rundur, state);
 		
 		plotVoltage();
-//		plotCurrent();
-//		plotGates();
+		plotCurrent();
+		plotGates();
 	}
 	
 	private void plotVoltage() {
 		if( !AppState.doVoltagePlots() ) return;
+		
 		double t[] = new double[time.size()];
 		for(int i=0; i<time.size(); i++) {
 			t[i] = time.get(i);
 		}
+		
 		new ODESolutionPlotter("Voltage", t, getVoltage(), new String[] {"voltage"});
 	}
 	
 	private void plotCurrent() {
+		if( !AppState.doCurrentPlots() ) return;
 		
+		// Find out which currents are to be plotted
+		int numCurrents = 0;
+		ArrayList<CurrentState> currentList = AppState.getCurrentList();
+		for(int i=0; i<currentList.size(); i++) {
+			Current c = currentList.get(i).getPhysicalCurrent();
+			if( !c.enabled() ) continue;
+			if( !c.getIncludeInPlots() ) continue;
+			numCurrents++;
+		}
+		
+		// Reformat data for plotter, extract names
+		double [] t = new double[time.size()];
+		double [][] I = new double[numCurrents][time.size()];
+		String [] currentNames = new String [numCurrents];
+		for(int i=0; i<time.size(); i++) {
+			t[i] = time.get(i);
+			int currentIndx = 0;
+			for(int j=0; j<currentList.size(); j++) {
+				Current c = currentList.get(j).getPhysicalCurrent();
+				if( !c.enabled() ) continue;
+				if( !c.getIncludeInPlots() ) continue;
+				I[currentIndx++][i] = accumulatedCurrent.get(i)[j];
+				currentNames[j] = c.getName(); // Shouldn't be in the inner loop
+			}
+		}
+				
+		new ODESolutionPlotter("Current", t, I, currentNames);
+	}
+	
+	private void plotGates() {
+		if( !AppState.doGatePlots() ) return;
+		
+		int numGates = 0;
+		ArrayList<CurrentState> currentList = AppState.getCurrentList();
+
+		// Find gates to be plotted
+		for(int i=0; i<currentList.size(); i++) {
+			Current c = currentList.get(i).getPhysicalCurrent();
+			if( !c.enabled() ) continue;
+			
+			if( c instanceof HHCurrent ) {
+				HHCurrent hhc = (HHCurrent) c;
+				ArrayList<HHGate> gl = hhc.getGateList();
+				for(int j=0; j<gl.size(); j++) {
+					HHGate g = gl.get(j);
+					if( !g.enabled() ) continue;
+					if( !g.includeInPlots() ) continue;
+					
+					numGates++;
+				}
+			}
+		}
+		
+		// Get names for the legend
+		String [] gateNames = new String[numGates];
+		int gateIndx = 0;
+		for(int i=0; i<currentList.size(); i++) {
+			Current c = currentList.get(i).getPhysicalCurrent();
+			if( !c.enabled() ) continue;
+			
+			if( c instanceof HHCurrent ) {
+				HHCurrent hhc = (HHCurrent) c;
+				ArrayList<HHGate> gl = hhc.getGateList();
+				for(int j=0; j<gl.size(); j++) {
+					HHGate g = gl.get(j);
+					if( !g.enabled() ) continue;
+					if( !g.includeInPlots() ) continue;
+					
+					gateNames[gateIndx++] = c.getName() + " - " + g.getName();
+				}
+			}
+		}
+		
+		// Get data and reformat for plotter
+		double [][] m = new double[numGates][time.size()];
+		double [] t = new double[time.size()];
+		for(int i=0; i<time.size(); i++) {
+			t[i] = time.get(i);
+			gateIndx = 0;
+			int stateIndx = -1;
+			for(int j=0; j<currentList.size(); j++) {
+				Current c = currentList.get(j).getPhysicalCurrent();
+				if( !c.enabled() ) continue;
+				
+				if( c instanceof HHCurrent ) {
+					for(HHGate g : ((HHCurrent) c).getGateList()) {
+						stateIndx++;
+						
+						if( !g.enabled() ) continue;
+						if( !g.includeInPlots() ) continue;
+						
+						m[gateIndx++][i] = accumulatedState.get(i)[stateIndx];
+					}
+				}
+			}
+		}
+
+		new ODESolutionPlotter("Gates", t, m, gateNames);
 	}
 	
 	private double[][] getVoltage() {

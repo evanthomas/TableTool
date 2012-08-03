@@ -18,9 +18,8 @@ public class GateState implements Serializable {
 	private Expression beta;
 	private int        exponent;
 	private boolean    enabled;
-	private boolean    doPlots;
 	private String name;
-	private GateTab ui;
+	private transient GateTab ui;
 	private transient HHGate  physicalGate;
 	private transient HHCurrent physicalCurrent;
 	
@@ -33,7 +32,7 @@ public class GateState implements Serializable {
 		this.ui = ui;
 		this.physicalCurrent = (HHCurrent) owningCurrent.getPhysicalCurrent();
 		
-		physicalGate = new HHGate(physicalCurrent, tau, inf, alpha, beta);
+		physicalGate = new HHGate(name, physicalCurrent, tau, inf, alpha, beta);
 		setExponent(1);
 		setEnabled(true);
 	}
@@ -71,7 +70,7 @@ public class GateState implements Serializable {
 
 	public void setUI(GateTab ui) {
 		this.ui = ui;
-		physicalGate = new HHGate(physicalCurrent, tau, inf, alpha, beta);
+		physicalGate = new HHGate(name, physicalCurrent, tau, inf, alpha, beta);
 		ui.setName(name);
 		ui.setExponent(exponent);
 		ui.setEnabled(enabled);
@@ -83,10 +82,12 @@ public class GateState implements Serializable {
 		this.physicalCurrent = physicalCurrent;		
 	}
 
-	public void setName(String s) { name = s; }
+	public void setName(String s) { 
+		name = s; 
+		physicalGate.setName(s);
+	}
 
 	public void setDoPlots(boolean e) {
-		this.doPlots = e;
 		physicalGate.setDoPlots(e);
 		ui.setDoPlots(e);
 	}

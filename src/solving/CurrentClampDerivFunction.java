@@ -20,6 +20,7 @@ public class CurrentClampDerivFunction implements AbstractDerivFunction {
 	private ArrayList<HHCurrent>    hhCurrentList;
 	private ArrayList<StimCurrent>  stimCurrentList;
 	private ArrayList<HHGate>       gateList;
+	private double [] currentCurrent;
 	
 	private double Cm;
 	
@@ -32,10 +33,13 @@ public class CurrentClampDerivFunction implements AbstractDerivFunction {
 		
 		Cm = AppState.getCapacitance(); // May throw exception
 
+		int currentCnt = 0;
 		N = 1; // There is always voltage
 		for(int i=0; i<currentList.size(); i++) {
 			Current c = currentList.get(i).getPhysicalCurrent();
 			if( !c.enabled() ) continue;
+			if( c.getIncludeInPlots() ) currentCnt++;
+			
 			c.initialise();
 			
 			if( c instanceof HHCurrent ) {
@@ -53,6 +57,9 @@ public class CurrentClampDerivFunction implements AbstractDerivFunction {
 			
 			if( c instanceof StimCurrent ) stimCurrentList.add((StimCurrent) c);
 		}
+		
+		// Query gates and currents and determine data capture for plots
+		currentCurrent = new double[currentCnt];
 	}
 
 	@Override
@@ -60,14 +67,27 @@ public class CurrentClampDerivFunction implements AbstractDerivFunction {
 		double v = x[N-1];
 		for(int i=0; i<N-1; i++) dxdt[i] = gateList.get(i).deriv(v, x[i]);
 		
-		double I = 0;
-		for(int i=0; i<stimCurrentList.size(); i++) I += stimCurrentList.get(i).I(t);
-		for(int i=0; i<hhCurrentList.size(); i++)   I += hhCurrentList.get(i).I(v);
+		double totalI = 0, I=0;
+		int currentIndx = 0;
+		for(int i=0; i<stimCurrentList.size(); i++) {
+			StimCurrent c = stimCurrentList.get(i);
+			I = c.I(t);
+			totalI += I;
+			currentCurrent[currentIndx++] = I;
+		}
+		for(int i=0; i<hhCurrentList.size(); i++) {
+			HHCurrent c =hhCurrentList.get(i); 
+			I = c.I(v);
+			totalI += I;
+			currentCurrent[currentIndx++] = I;
+		}
 		
-		dxdt[N-1] = I/Cm;
+		dxdt[N-1] = totalI/Cm;
 		
 		return;
 	}
+	
+	public double [] getCurrentCurrent() { return currentCurrent; }
 
 	@Override
 	public int getDimension() {
@@ -84,5 +104,4 @@ public class CurrentClampDerivFunction implements AbstractDerivFunction {
 		
 		return state;
 	}
-
 }

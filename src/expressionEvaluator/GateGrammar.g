@@ -57,6 +57,7 @@ gateExpression : add EOF! ;
 term
   : FLOAT
   | VOLTAGE
+  | TIME
   | '('! add ')'!
   | MATH^ '('! add ')'! {checkSingleMath($MATH.text);}
   | MATH^ '('! add ','! add ')'! {checkDoubleMath($MATH.text);}
@@ -90,24 +91,24 @@ add
 
 ternary
    :
-   'if'^ '('! logical ','! add ','! add ')'!
+   'if'^ '('! or ','! add ','! add ')'!
    ;
    
 logical
-  : comparison
-  | '(' or ')'
+  : comparison {System.out.println("d");}
+  | '('! or ')'! {System.out.println("e");}
   ;
   
  not
-   : '!'^ logical
+   : ('!'^)? comparison
  ;
-  
+
 and
-  : not ('&&'^ not)*
+  : logical ('&&'^ logical)*
 ;
- 
+
 or
-  : and ('||'^ and)
+  : and ('||'^ and)*
 ;
 
 comparison
@@ -121,6 +122,14 @@ comparison
   (
     'v'
     | 'V'
+  )
+  ;
+  
+ TIME
+  :
+  (
+    't'
+    | 'T'
   )
   ;
 

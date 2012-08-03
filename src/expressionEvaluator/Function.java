@@ -42,11 +42,18 @@ public class Function {
 	
 	public String getExpr() { return expr; }
 	
-	public double eval() throws ParseException { return eval(0); }
-	
-	public double eval(double v) throws ParseException {
-		nodeStream.rewind(0);
+	public double evalV(double v) throws ParseException { 
 		gf.setV(v);
+		return eval();
+	}
+	
+	public double evalT(double t) throws ParseException {
+		gf.setT(t);
+		return eval();
+	}
+	
+	public double eval() throws ParseException {
+		nodeStream.rewind(0);
 		try {
 			return gf.gateFunction();
 		} catch (RecognitionException e) {

@@ -53,6 +53,7 @@ public abstract class CurrentState implements Serializable {
 
 	public void setName(String newname) {
 		name = newname;
+		physicalCurrent.setName(newname);
 	}
 
 	public abstract void restore(ModelDesignerView ui);

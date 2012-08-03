@@ -1,6 +1,5 @@
 package modelView;
 
-import java.awt.AWTEvent;
 import java.awt.Color;
 import java.io.Serializable;
 
@@ -13,9 +12,10 @@ public class Expression implements Serializable {
 
 
 	private static final long serialVersionUID = 1L;
+
+	private String expr;
 	
 	private transient Function f;
-	private String expr;
 	private transient boolean valid;
 	private transient JTextComponent tf;
 	
@@ -38,18 +38,23 @@ public class Expression implements Serializable {
 		return f.eval();
 	}
 	
-	public double eval(double x) throws ParseException {
-		return f.eval(x);
+	public double evalV(double x) throws ParseException {
+		return f.evalV(x);
+	}
+	
+	public double evalT(double x) throws ParseException {
+		return f.evalT(x);
 	}
 	
 	public String getExpr() { return expr; }
 	public boolean isValid() { return valid; }
 
-	public void textFieldHandler(AWTEvent e) {
+	public void textFieldHandler() {
 		String expr = tf.getText();
 		try {
 			setStringOnly(expr);
 		} catch(ParseException ex) {
+			System.out.println(ex.getMessage());
 			tf.setBackground(Color.RED);
 			return;
 		}

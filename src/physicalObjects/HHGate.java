@@ -22,9 +22,10 @@ public class HHGate {
 	private int exponent;
 	private boolean enabled;
 	private boolean includeInPlots;
+	private String name;
 	private HHCurrent owner;
 	
-	public HHGate(HHCurrent owner, Expression tauFn, Expression infFn, Expression alphaFn, Expression betaFn) {
+	public HHGate(String name, HHCurrent owner, Expression tauFn, Expression infFn, Expression alphaFn, Expression betaFn) {
 		this.tauFn   = tauFn;
 		this.infFn   = infFn;
 		this.alphaFn = alphaFn;
@@ -34,6 +35,7 @@ public class HHGate {
 		this.owner.addGate(this);
 		exponent = 1;
 		this.includeInPlots = true;
+		this.name = name;
 	}
 
 	public void initialise() throws ParseException {
@@ -86,9 +88,9 @@ public class HHGate {
 		for(int i=0; i<numEntries; i++) {
 			double x;
 			if( !infFn.isValid() ) {
-				x = alphaFn.eval(v)/(alphaFn.eval(v)+betaFn.eval(v));
+				x = alphaFn.evalV(v)/(alphaFn.evalV(v)+betaFn.evalV(v));
 			} else {
-				x = infFn.eval(v);
+				x = infFn.evalV(v);
 			}
 			t[0][i] = x;
 			t[1][i] = v;
@@ -108,9 +110,9 @@ public class HHGate {
 		for(int i=0; i<numEntries; i++) {
 			double x;
 			if( !tauFn.isValid() ) {
-				x = 1/(alphaFn.eval(v)+betaFn.eval(v));
+				x = 1/(alphaFn.evalV(v)+betaFn.evalV(v));
 			} else {
-				x = tauFn.eval(v);
+				x = tauFn.evalV(v);
 			}
 			t[0][i] = x;
 			t[1][i] = v;
@@ -142,11 +144,10 @@ public class HHGate {
 	
 	public void setExponent(int e) { this.exponent = e; }
 	public int getExponent() { return exponent; }
-	
 	public void setEnabled(boolean e) { this.enabled = e; }
 	public boolean enabled() { return enabled; }
-
-	public void setDoPlots(boolean e) {
-		includeInPlots = e;
-	} 
+	public void setDoPlots(boolean e) { includeInPlots = e;	}
+	public boolean includeInPlots() { return includeInPlots; }
+	public String getName() { return name; }
+	public void setName(String n) { name = n; }
 }

@@ -2,9 +2,15 @@ package plotting;
 
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Scanner;
 
-import javax.swing.JFrame;
+import javax.swing.border.EtchedBorder;
 
+import modelState.AppState;
 import modelView.ModelDesignerView;
 
 import org.jfree.chart.ChartFactory;
@@ -20,47 +26,47 @@ import org.jfree.chart.util.DefaultShadowGenerator;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import physicalObjects.HHGate;
 import expressionEvaluator.ParseException;
 
-import physicalObjects.HHGate;
+public class GatePlotter extends PlotFrame {
 
-public class GatePlotter extends JFrame {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-
+	
+	double [] infTable;
+	double [] tauTable;
+	double [] v;
+	DefaultXYDataset infData;
+	DefaultXYDataset tauData;
+	
 	public GatePlotter(String plotTitle, HHGate gate) throws ParseException {
 		super("Gate plot");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ModelDesignerView.class.getResource("/images/whatmeworry.jpg")));
 
-		double [] infTable = gate.getInfTable();
-		double [] tauTable = gate.getTauTable();
-		double [] v        = gate.getVoltage();
+		infTable = gate.getInfTable();
+		tauTable = gate.getTauTable();
+		v        = gate.getVoltage();
 		
-		XYDataset infData = createData(v, infTable, "inf");
-		XYDataset tauData = createData(v, tauTable, "tau");
+		infData = createData(v, infTable, "inf");
+		tauData = createData(v, tauTable, "tau");
 		
         // based on the dataset we create the chart
         JFreeChart chart = createXYPlot(infData, tauData, plotTitle);
         
         // we put the chart into a panel
-        ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setMouseWheelEnabled(true);
-        
-        // default size
-        chartPanel.setPreferredSize(new java.awt.Dimension(600, 400));
-        
-        // add it to our application
-        setContentPane(chartPanel);
+        plotPanel = new ChartPanel(chart);
+        plotPanel.setMouseWheelEnabled(true);
+		plotPanel.setBounds(10, 10, 600, 400);
+		contentPane.add(plotPanel);
+		plotPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 
         // Show panel
-        pack();
         setVisible(true);
+        
+        AppState.registerGraph(this);
 	}
 	
-	private XYDataset createData(double v[], double y[], String lstr) {
+	private DefaultXYDataset createData(double v[], double y[], String lstr) {
 		DefaultXYDataset data = new DefaultXYDataset();
 		double [][]dataTable = new double[2][v.length];
 		for(int i=0; i<v.length; i++) {
@@ -100,5 +106,38 @@ public class GatePlotter extends JFrame {
 		plot.setShadowGenerator(new DefaultShadowGenerator(5, Color.black, 0.8f, 5,	-Math.PI / 4));
 		
 		return chart;
+	}
+
+	@Override
+	protected void exportFile(File file) throws IOException {
+		PrintStream f = new PrintStream(file);
+		
+		for(int i=0; i<v.length; i++) 
+			f.println(v[i]+"  "+infTable[i]+"  "+tauTable[i]);
+		
+		f.close();
+		
+		if( f.checkError() ) throw new IOException();
+	}
+
+	@Override
+	protected void importFile(File f) throws IOException {
+		Scanner s = new Scanner(new FileInputStream(f));
+		
+		int n = v.length;
+		double [][] compare_infTable = new double[2][n];
+		double [][] compare_tauTable = new double[2][n];
+		
+		// No error checking just throw and exception
+		for(int i=0; i<n; i++) {
+			double v = s.nextDouble();
+			compare_infTable[1][i] = v;
+			compare_tauTable[1][i] = v;
+			compare_infTable[0][i] = s.nextDouble();
+			compare_tauTable[0][i] = s.nextDouble();
+		}
+		
+		tauData.addSeries("tau - comparison", compare_tauTable);
+		infData.addSeries("inf - comparison", compare_infTable);
 	}
 }

@@ -14,8 +14,10 @@ import java.lang.Math;
 @members {
 
 private double v;
+private double t;
 
 public void setV(double v) { this.v = v; }
+public void setT(double t) { this.t = t; }
 
 private double math(String fn, double op1, double op2) {
 if( fn.equals("exp") ) return Math.exp(op1);
@@ -41,16 +43,17 @@ expression returns [double result]
 | ^('^' op1=expression op2=expression) { result = Math.pow(op1,op2); }
 | ^(NEGATION op=expression) { result = -op; }
 | ^(MATH op1=expression (op2=expression)?) { result = math($MATH.text, op1, op2); }
-| ^('if' t=logical op1=expression op2=expression) { result = t?op1:op2; }
+| ^('if' b=logical op1=expression op2=expression) { result = b?op1:op2; }
 | FLOAT { result = Double.parseDouble($FLOAT.text); }
 | VOLTAGE { result = v;}
+| TIME { result = t;}
 ;
 
 logical returns [boolean truth]
 : ^('!' op=logical) { truth = !op; }
 | ^('&&' op1=logical op2=logical) { truth = op1&&op2; }
 | ^('||' op1=logical op2=logical) { truth = op1||op2; }
-| (t=comparison) { truth = t; }
+| (b=comparison) { truth = b; }
 ;
 
 comparison returns [boolean truth]

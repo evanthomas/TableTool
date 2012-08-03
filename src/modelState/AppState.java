@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import javax.swing.JFrame;
 import physicalObjects.HHCurrent;
 import physicalObjects.HHGate;
 
@@ -42,11 +43,14 @@ public class AppState {
 	
 	private static ArrayList<CurrentState> currentList;
 	
+	private static ArrayList<JFrame> graphPanelList;
+ 	
 	private static final int saveFileVersion = 1;
 	private static final int tableFileVersion = 1;
 
 	static {
 		currentList = new ArrayList<CurrentState>();
+		graphPanelList = new ArrayList<JFrame>();
 		clampMode = ClampMode.CURRENT_CLAMP;
 		doCurrentPlots = true;
 		doVoltagePlots = true;
@@ -238,7 +242,7 @@ public class AppState {
 		out.writeObject(clampMode);
 		out.writeBoolean(doCurrentPlots);
 		out.writeBoolean(doGatePlots);
-		out.writeBoolean(doStimulusPlots);
+//		out.writeBoolean(doStimulusPlots);
 		out.writeBoolean(doVoltagePlots);
 		out.writeObject(currentList);
 
@@ -266,8 +270,8 @@ public class AppState {
 			ui.setDoCurrentPlots(doCurrentPlots);
 			doGatePlots = in.readBoolean();
 			ui.setDoGatePlots(doGatePlots);
-			doStimulusPlots = in.readBoolean();
-			ui.setDoStimulusPlots(doStimulusPlots);
+//			doStimulusPlots = in.readBoolean();
+//			ui.setDoStimulusPlots(doStimulusPlots);
 			doVoltagePlots = in.readBoolean();
 			ui.setDoVoltagePlots(doVoltagePlots);
 			currentList = (ArrayList<CurrentState>)in.readObject();
@@ -362,5 +366,14 @@ public class AppState {
 				(byte)(value >>> 16),
 				(byte)(value >>> 24)
 				};
+	}
+
+	public static void closeAllGraphs() {
+		for(JFrame f : graphPanelList) 
+			f.dispose();
+		graphPanelList.clear();
+	}
+	public static void registerGraph(JFrame f) {
+		graphPanelList.add(f);
 	}
 }

@@ -1,7 +1,13 @@
 package modelView;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
@@ -9,14 +15,8 @@ import javax.swing.JTextField;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JEditorPane;
-
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import modelState.AppState;
 import modelState.CurrentState;
@@ -66,7 +66,9 @@ public class HHCurrentTab extends CurrentTab {
 		
 		conductance.setUI(txtConductance);
 		reversal.setUI(txtReversal);
-		
+		txtConductance.getDocument().addDocumentListener(new ExpressionListener(conductance));
+		txtReversal.getDocument().addDocumentListener(new ExpressionListener(reversal));
+
 		currentTabPanel.setSelectedComponent(this);		
 	}
 	
@@ -109,17 +111,7 @@ public class HHCurrentTab extends CurrentTab {
 		lblReversalPotentialmv.setBounds(21, 69, 147, 16);
 		
 		txtReversal = new JTextField();
-		txtReversal.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent arg0) {
-				conductance.textFieldHandler(arg0);
-			}
-		});
-		txtReversal.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				conductance.textFieldHandler(arg0);
-			}
-		});
+
 		txtReversal.setBounds(230, 69, 86, 20);
 		txtReversal.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		txtReversal.setColumns(10);
@@ -128,17 +120,7 @@ public class HHCurrentTab extends CurrentTab {
 		lblConductancems.setBounds(21, 106, 121, 16);
 		
 		txtConductance = new JTextField();
-		txtConductance.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				reversal.textFieldHandler(e);
-			}
-		});
-		txtConductance.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				reversal.textFieldHandler(e);
-			}
-		});
+
 		txtConductance.setBounds(230, 105, 86, 20);
 		txtConductance.setColumns(10);
 		
