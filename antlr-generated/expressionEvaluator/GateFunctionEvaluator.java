@@ -1,4 +1,4 @@
-// $ANTLR 3.4 D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g 2012-07-24 14:02:57
+// $ANTLR 3.4 D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g 2012-08-03 14:02:49
 
 package expressionEvaluator;
 import java.lang.Math;
@@ -13,11 +13,10 @@ import java.util.ArrayList;
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class GateFunctionEvaluator extends TreeParser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "DIGIT", "DOT", "EXPONENT", "FLOAT", "LETTER", "MATH", "NEGATION", "SIGN", "VOLTAGE", "WS", "'!'", "'!='", "'&&'", "'('", "')'", "'*'", "'+'", "','", "'-'", "'/'", "'<'", "'<='", "'=='", "'>'", "'>='", "'^'", "'if'", "'||'"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "DIGIT", "DOT", "EXPONENT", "FLOAT", "LETTER", "MATH", "NEGATION", "SIGN", "TIME", "VOLTAGE", "WS", "'!'", "'!='", "'&&'", "'('", "')'", "'*'", "'+'", "','", "'-'", "'/'", "'<'", "'<='", "'=='", "'>'", "'>='", "'^'", "'if'", "'||'"
     };
 
     public static final int EOF=-1;
-    public static final int T__14=14;
     public static final int T__15=15;
     public static final int T__16=16;
     public static final int T__17=17;
@@ -35,6 +34,7 @@ public class GateFunctionEvaluator extends TreeParser {
     public static final int T__29=29;
     public static final int T__30=30;
     public static final int T__31=31;
+    public static final int T__32=32;
     public static final int DIGIT=4;
     public static final int DOT=5;
     public static final int EXPONENT=6;
@@ -43,8 +43,9 @@ public class GateFunctionEvaluator extends TreeParser {
     public static final int MATH=9;
     public static final int NEGATION=10;
     public static final int SIGN=11;
-    public static final int VOLTAGE=12;
-    public static final int WS=13;
+    public static final int TIME=12;
+    public static final int VOLTAGE=13;
+    public static final int WS=14;
 
     // delegates
     public TreeParser[] getDelegates() {
@@ -62,13 +63,15 @@ public class GateFunctionEvaluator extends TreeParser {
     }
 
     public String[] getTokenNames() { return GateFunctionEvaluator.tokenNames; }
-    public String getGrammarFileName() { return "D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g"; }
+    public String getGrammarFileName() { return "D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g"; }
 
 
 
     private double v;
+    private double t;
 
     public void setV(double v) { this.v = v; }
+    public void setT(double t) { this.t = t; }
 
     private double math(String fn, double op1, double op2) {
     if( fn.equals("exp") ) return Math.exp(op1);
@@ -84,7 +87,7 @@ public class GateFunctionEvaluator extends TreeParser {
 
 
     // $ANTLR start "gateFunction"
-    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:32:1: gateFunction returns [double result] : e= expression EOF ;
+    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:34:1: gateFunction returns [double result] : e= expression EOF ;
     public final double gateFunction() throws RecognitionException {
         double result = 0.0;
 
@@ -93,8 +96,8 @@ public class GateFunctionEvaluator extends TreeParser {
 
 
         try {
-            // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:33:3: (e= expression EOF )
-            // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:33:3: e= expression EOF
+            // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:35:3: (e= expression EOF )
+            // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:35:3: e= expression EOF
             {
             pushFollow(FOLLOW_expression_in_gateFunction68);
             e=expression();
@@ -124,7 +127,7 @@ public class GateFunctionEvaluator extends TreeParser {
 
 
     // $ANTLR start "expression"
-    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:36:1: expression returns [double result] : ( ^( '+' op1= expression op2= expression ) | ^( '-' op1= expression op2= expression ) | ^( '*' op1= expression op2= expression ) | ^( '/' op1= expression op2= expression ) | ^( '^' op1= expression op2= expression ) | ^( NEGATION op= expression ) | ^( MATH op1= expression (op2= expression )? ) | ^( 'if' t= logical op1= expression op2= expression ) | FLOAT | VOLTAGE );
+    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:38:1: expression returns [double result] : ( ^( '+' op1= expression op2= expression ) | ^( '-' op1= expression op2= expression ) | ^( '*' op1= expression op2= expression ) | ^( '/' op1= expression op2= expression ) | ^( '^' op1= expression op2= expression ) | ^( NEGATION op= expression ) | ^( MATH op1= expression (op2= expression )? ) | ^( 'if' b= logical op1= expression op2= expression ) | FLOAT | VOLTAGE | TIME );
     public final double expression() throws RecognitionException {
         double result = 0.0;
 
@@ -137,34 +140,34 @@ public class GateFunctionEvaluator extends TreeParser {
 
         double op =0.0;
 
-        boolean t =false;
+        boolean b =false;
 
 
         try {
-            // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:37:3: ( ^( '+' op1= expression op2= expression ) | ^( '-' op1= expression op2= expression ) | ^( '*' op1= expression op2= expression ) | ^( '/' op1= expression op2= expression ) | ^( '^' op1= expression op2= expression ) | ^( NEGATION op= expression ) | ^( MATH op1= expression (op2= expression )? ) | ^( 'if' t= logical op1= expression op2= expression ) | FLOAT | VOLTAGE )
-            int alt2=10;
+            // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:39:3: ( ^( '+' op1= expression op2= expression ) | ^( '-' op1= expression op2= expression ) | ^( '*' op1= expression op2= expression ) | ^( '/' op1= expression op2= expression ) | ^( '^' op1= expression op2= expression ) | ^( NEGATION op= expression ) | ^( MATH op1= expression (op2= expression )? ) | ^( 'if' b= logical op1= expression op2= expression ) | FLOAT | VOLTAGE | TIME )
+            int alt2=11;
             switch ( input.LA(1) ) {
-            case 20:
+            case 21:
                 {
                 alt2=1;
                 }
                 break;
-            case 22:
+            case 23:
                 {
                 alt2=2;
                 }
                 break;
-            case 19:
+            case 20:
                 {
                 alt2=3;
                 }
                 break;
-            case 23:
+            case 24:
                 {
                 alt2=4;
                 }
                 break;
-            case 29:
+            case 30:
                 {
                 alt2=5;
                 }
@@ -179,7 +182,7 @@ public class GateFunctionEvaluator extends TreeParser {
                 alt2=7;
                 }
                 break;
-            case 30:
+            case 31:
                 {
                 alt2=8;
                 }
@@ -194,6 +197,11 @@ public class GateFunctionEvaluator extends TreeParser {
                 alt2=10;
                 }
                 break;
+            case TIME:
+                {
+                alt2=11;
+                }
+                break;
             default:
                 NoViableAltException nvae =
                     new NoViableAltException("", 2, 0, input);
@@ -204,9 +212,9 @@ public class GateFunctionEvaluator extends TreeParser {
 
             switch (alt2) {
                 case 1 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:37:3: ^( '+' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:39:3: ^( '+' op1= expression op2= expression )
                     {
-                    match(input,20,FOLLOW_20_in_expression86); 
+                    match(input,21,FOLLOW_21_in_expression86); 
 
                     match(input, Token.DOWN, null); 
                     pushFollow(FOLLOW_expression_in_expression90);
@@ -229,9 +237,9 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 2 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:38:3: ^( '-' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:40:3: ^( '-' op1= expression op2= expression )
                     {
-                    match(input,22,FOLLOW_22_in_expression102); 
+                    match(input,23,FOLLOW_23_in_expression102); 
 
                     match(input, Token.DOWN, null); 
                     pushFollow(FOLLOW_expression_in_expression106);
@@ -254,9 +262,9 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 3 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:39:3: ^( '*' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:41:3: ^( '*' op1= expression op2= expression )
                     {
-                    match(input,19,FOLLOW_19_in_expression118); 
+                    match(input,20,FOLLOW_20_in_expression118); 
 
                     match(input, Token.DOWN, null); 
                     pushFollow(FOLLOW_expression_in_expression122);
@@ -279,9 +287,9 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 4 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:40:3: ^( '/' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:42:3: ^( '/' op1= expression op2= expression )
                     {
-                    match(input,23,FOLLOW_23_in_expression134); 
+                    match(input,24,FOLLOW_24_in_expression134); 
 
                     match(input, Token.DOWN, null); 
                     pushFollow(FOLLOW_expression_in_expression138);
@@ -304,9 +312,9 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 5 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:41:3: ^( '^' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:43:3: ^( '^' op1= expression op2= expression )
                     {
-                    match(input,29,FOLLOW_29_in_expression150); 
+                    match(input,30,FOLLOW_30_in_expression150); 
 
                     match(input, Token.DOWN, null); 
                     pushFollow(FOLLOW_expression_in_expression154);
@@ -329,7 +337,7 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 6 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:42:3: ^( NEGATION op= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:44:3: ^( NEGATION op= expression )
                     {
                     match(input,NEGATION,FOLLOW_NEGATION_in_expression166); 
 
@@ -348,7 +356,7 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 7 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:43:3: ^( MATH op1= expression (op2= expression )? )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:45:3: ^( MATH op1= expression (op2= expression )? )
                     {
                     MATH1=(CommonTree)match(input,MATH,FOLLOW_MATH_in_expression178); 
 
@@ -359,16 +367,16 @@ public class GateFunctionEvaluator extends TreeParser {
                     state._fsp--;
 
 
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:43:25: (op2= expression )?
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:45:25: (op2= expression )?
                     int alt1=2;
                     int LA1_0 = input.LA(1);
 
-                    if ( (LA1_0==FLOAT||(LA1_0 >= MATH && LA1_0 <= NEGATION)||LA1_0==VOLTAGE||(LA1_0 >= 19 && LA1_0 <= 20)||(LA1_0 >= 22 && LA1_0 <= 23)||(LA1_0 >= 29 && LA1_0 <= 30)) ) {
+                    if ( (LA1_0==FLOAT||(LA1_0 >= MATH && LA1_0 <= NEGATION)||(LA1_0 >= TIME && LA1_0 <= VOLTAGE)||(LA1_0 >= 20 && LA1_0 <= 21)||(LA1_0 >= 23 && LA1_0 <= 24)||(LA1_0 >= 30 && LA1_0 <= 31)) ) {
                         alt1=1;
                     }
                     switch (alt1) {
                         case 1 :
-                            // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:43:26: op2= expression
+                            // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:45:26: op2= expression
                             {
                             pushFollow(FOLLOW_expression_in_expression187);
                             op2=expression();
@@ -390,13 +398,13 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 8 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:44:3: ^( 'if' t= logical op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:46:3: ^( 'if' b= logical op1= expression op2= expression )
                     {
-                    match(input,30,FOLLOW_30_in_expression197); 
+                    match(input,31,FOLLOW_31_in_expression197); 
 
                     match(input, Token.DOWN, null); 
                     pushFollow(FOLLOW_logical_in_expression201);
-                    t=logical();
+                    b=logical();
 
                     state._fsp--;
 
@@ -416,12 +424,12 @@ public class GateFunctionEvaluator extends TreeParser {
                     match(input, Token.UP, null); 
 
 
-                     result = t?op1:op2; 
+                     result = b?op1:op2; 
 
                     }
                     break;
                 case 9 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:45:3: FLOAT
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:47:3: FLOAT
                     {
                     FLOAT2=(CommonTree)match(input,FLOAT,FOLLOW_FLOAT_in_expression216); 
 
@@ -430,11 +438,20 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 10 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:46:3: VOLTAGE
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:48:3: VOLTAGE
                     {
                     match(input,VOLTAGE,FOLLOW_VOLTAGE_in_expression222); 
 
                      result = v;
+
+                    }
+                    break;
+                case 11 :
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:49:3: TIME
+                    {
+                    match(input,TIME,FOLLOW_TIME_in_expression228); 
+
+                     result = t;
 
                     }
                     break;
@@ -456,7 +473,7 @@ public class GateFunctionEvaluator extends TreeParser {
 
 
     // $ANTLR start "logical"
-    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:49:1: logical returns [boolean truth] : ( ^( '!' op= logical ) | ^( '&&' op1= logical op2= logical ) | ^( '||' op1= logical op2= logical ) | (t= comparison ) );
+    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:52:1: logical returns [boolean truth] : ( ^( '!' op= logical ) | ^( '&&' op1= logical op2= logical ) | ^( '||' op1= logical op2= logical ) | (b= comparison ) );
     public final boolean logical() throws RecognitionException {
         boolean truth = false;
 
@@ -467,34 +484,34 @@ public class GateFunctionEvaluator extends TreeParser {
 
         boolean op2 =false;
 
-        boolean t =false;
+        boolean b =false;
 
 
         try {
-            // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:50:3: ( ^( '!' op= logical ) | ^( '&&' op1= logical op2= logical ) | ^( '||' op1= logical op2= logical ) | (t= comparison ) )
+            // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:53:3: ( ^( '!' op= logical ) | ^( '&&' op1= logical op2= logical ) | ^( '||' op1= logical op2= logical ) | (b= comparison ) )
             int alt3=4;
             switch ( input.LA(1) ) {
-            case 14:
+            case 15:
                 {
                 alt3=1;
                 }
                 break;
-            case 16:
+            case 17:
                 {
                 alt3=2;
                 }
                 break;
-            case 31:
+            case 32:
                 {
                 alt3=3;
                 }
                 break;
-            case 15:
-            case 24:
+            case 16:
             case 25:
             case 26:
             case 27:
             case 28:
+            case 29:
                 {
                 alt3=4;
                 }
@@ -509,12 +526,12 @@ public class GateFunctionEvaluator extends TreeParser {
 
             switch (alt3) {
                 case 1 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:50:3: ^( '!' op= logical )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:53:3: ^( '!' op= logical )
                     {
-                    match(input,14,FOLLOW_14_in_logical238); 
+                    match(input,15,FOLLOW_15_in_logical244); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_logical_in_logical242);
+                    pushFollow(FOLLOW_logical_in_logical248);
                     op=logical();
 
                     state._fsp--;
@@ -528,18 +545,18 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 2 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:51:3: ^( '&&' op1= logical op2= logical )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:54:3: ^( '&&' op1= logical op2= logical )
                     {
-                    match(input,16,FOLLOW_16_in_logical250); 
+                    match(input,17,FOLLOW_17_in_logical256); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_logical_in_logical254);
+                    pushFollow(FOLLOW_logical_in_logical260);
                     op1=logical();
 
                     state._fsp--;
 
 
-                    pushFollow(FOLLOW_logical_in_logical258);
+                    pushFollow(FOLLOW_logical_in_logical264);
                     op2=logical();
 
                     state._fsp--;
@@ -553,18 +570,18 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 3 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:52:3: ^( '||' op1= logical op2= logical )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:55:3: ^( '||' op1= logical op2= logical )
                     {
-                    match(input,31,FOLLOW_31_in_logical266); 
+                    match(input,32,FOLLOW_32_in_logical272); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_logical_in_logical270);
+                    pushFollow(FOLLOW_logical_in_logical276);
                     op1=logical();
 
                     state._fsp--;
 
 
-                    pushFollow(FOLLOW_logical_in_logical274);
+                    pushFollow(FOLLOW_logical_in_logical280);
                     op2=logical();
 
                     state._fsp--;
@@ -578,13 +595,13 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 4 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:53:3: (t= comparison )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:56:3: (b= comparison )
                     {
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:53:3: (t= comparison )
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:53:4: t= comparison
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:56:3: (b= comparison )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:56:4: b= comparison
                     {
-                    pushFollow(FOLLOW_comparison_in_logical284);
-                    t=comparison();
+                    pushFollow(FOLLOW_comparison_in_logical290);
+                    b=comparison();
 
                     state._fsp--;
 
@@ -592,7 +609,7 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
 
 
-                     truth = t; 
+                     truth = b; 
 
                     }
                     break;
@@ -614,7 +631,7 @@ public class GateFunctionEvaluator extends TreeParser {
 
 
     // $ANTLR start "comparison"
-    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:56:1: comparison returns [boolean truth] : ( ^( '>' op1= expression op2= expression ) | ^( '<' op1= expression op2= expression ) | ^( '>=' op1= expression op2= expression ) | ^( '<=' op1= expression op2= expression ) | ^( '==' op1= expression op2= expression ) | ^( '!=' op1= expression op2= expression ) );
+    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:59:1: comparison returns [boolean truth] : ( ^( '>' op1= expression op2= expression ) | ^( '<' op1= expression op2= expression ) | ^( '>=' op1= expression op2= expression ) | ^( '<=' op1= expression op2= expression ) | ^( '==' op1= expression op2= expression ) | ^( '!=' op1= expression op2= expression ) );
     public final boolean comparison() throws RecognitionException {
         boolean truth = false;
 
@@ -625,35 +642,35 @@ public class GateFunctionEvaluator extends TreeParser {
 
 
         try {
-            // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:57:3: ( ^( '>' op1= expression op2= expression ) | ^( '<' op1= expression op2= expression ) | ^( '>=' op1= expression op2= expression ) | ^( '<=' op1= expression op2= expression ) | ^( '==' op1= expression op2= expression ) | ^( '!=' op1= expression op2= expression ) )
+            // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:60:3: ( ^( '>' op1= expression op2= expression ) | ^( '<' op1= expression op2= expression ) | ^( '>=' op1= expression op2= expression ) | ^( '<=' op1= expression op2= expression ) | ^( '==' op1= expression op2= expression ) | ^( '!=' op1= expression op2= expression ) )
             int alt4=6;
             switch ( input.LA(1) ) {
-            case 27:
+            case 28:
                 {
                 alt4=1;
                 }
                 break;
-            case 24:
+            case 25:
                 {
                 alt4=2;
                 }
                 break;
-            case 28:
+            case 29:
                 {
                 alt4=3;
                 }
                 break;
-            case 25:
+            case 26:
                 {
                 alt4=4;
                 }
                 break;
-            case 26:
+            case 27:
                 {
                 alt4=5;
                 }
                 break;
-            case 15:
+            case 16:
                 {
                 alt4=6;
                 }
@@ -668,18 +685,18 @@ public class GateFunctionEvaluator extends TreeParser {
 
             switch (alt4) {
                 case 1 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:57:3: ^( '>' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:60:3: ^( '>' op1= expression op2= expression )
                     {
-                    match(input,27,FOLLOW_27_in_comparison301); 
+                    match(input,28,FOLLOW_28_in_comparison307); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_expression_in_comparison306);
+                    pushFollow(FOLLOW_expression_in_comparison312);
                     op1=expression();
 
                     state._fsp--;
 
 
-                    pushFollow(FOLLOW_expression_in_comparison310);
+                    pushFollow(FOLLOW_expression_in_comparison316);
                     op2=expression();
 
                     state._fsp--;
@@ -693,18 +710,18 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 2 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:58:3: ^( '<' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:61:3: ^( '<' op1= expression op2= expression )
                     {
-                    match(input,24,FOLLOW_24_in_comparison318); 
+                    match(input,25,FOLLOW_25_in_comparison324); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_expression_in_comparison323);
+                    pushFollow(FOLLOW_expression_in_comparison329);
                     op1=expression();
 
                     state._fsp--;
 
 
-                    pushFollow(FOLLOW_expression_in_comparison327);
+                    pushFollow(FOLLOW_expression_in_comparison333);
                     op2=expression();
 
                     state._fsp--;
@@ -718,18 +735,18 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 3 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:59:3: ^( '>=' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:62:3: ^( '>=' op1= expression op2= expression )
                     {
-                    match(input,28,FOLLOW_28_in_comparison335); 
+                    match(input,29,FOLLOW_29_in_comparison341); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_expression_in_comparison339);
+                    pushFollow(FOLLOW_expression_in_comparison345);
                     op1=expression();
 
                     state._fsp--;
 
 
-                    pushFollow(FOLLOW_expression_in_comparison343);
+                    pushFollow(FOLLOW_expression_in_comparison349);
                     op2=expression();
 
                     state._fsp--;
@@ -743,18 +760,18 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 4 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:60:3: ^( '<=' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:63:3: ^( '<=' op1= expression op2= expression )
                     {
-                    match(input,25,FOLLOW_25_in_comparison351); 
+                    match(input,26,FOLLOW_26_in_comparison357); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_expression_in_comparison355);
+                    pushFollow(FOLLOW_expression_in_comparison361);
                     op1=expression();
 
                     state._fsp--;
 
 
-                    pushFollow(FOLLOW_expression_in_comparison359);
+                    pushFollow(FOLLOW_expression_in_comparison365);
                     op2=expression();
 
                     state._fsp--;
@@ -768,18 +785,18 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 5 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:61:3: ^( '==' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:64:3: ^( '==' op1= expression op2= expression )
                     {
-                    match(input,26,FOLLOW_26_in_comparison367); 
+                    match(input,27,FOLLOW_27_in_comparison373); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_expression_in_comparison371);
+                    pushFollow(FOLLOW_expression_in_comparison377);
                     op1=expression();
 
                     state._fsp--;
 
 
-                    pushFollow(FOLLOW_expression_in_comparison375);
+                    pushFollow(FOLLOW_expression_in_comparison381);
                     op2=expression();
 
                     state._fsp--;
@@ -793,18 +810,18 @@ public class GateFunctionEvaluator extends TreeParser {
                     }
                     break;
                 case 6 :
-                    // D:\\stuff\\Dropbox\\eclipse\\EmbeddedDC\\war\\WEB-INF\\classes\\expressionEvaluator\\GateFunctionEvaluator.g:62:3: ^( '!=' op1= expression op2= expression )
+                    // D:\\Stuff\\Dropbox\\eclipse\\TableTool\\src\\expressionEvaluator\\GateFunctionEvaluator.g:65:3: ^( '!=' op1= expression op2= expression )
                     {
-                    match(input,15,FOLLOW_15_in_comparison383); 
+                    match(input,16,FOLLOW_16_in_comparison389); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_expression_in_comparison387);
+                    pushFollow(FOLLOW_expression_in_comparison393);
                     op1=expression();
 
                     state._fsp--;
 
 
-                    pushFollow(FOLLOW_expression_in_comparison391);
+                    pushFollow(FOLLOW_expression_in_comparison397);
                     op2=expression();
 
                     state._fsp--;
@@ -839,58 +856,59 @@ public class GateFunctionEvaluator extends TreeParser {
 
     public static final BitSet FOLLOW_expression_in_gateFunction68 = new BitSet(new long[]{0x0000000000000000L});
     public static final BitSet FOLLOW_EOF_in_gateFunction70 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_20_in_expression86 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_expression90 = new BitSet(new long[]{0x0000000060D81680L});
+    public static final BitSet FOLLOW_21_in_expression86 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_expression90 = new BitSet(new long[]{0x00000000C1B03680L});
     public static final BitSet FOLLOW_expression_in_expression94 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_22_in_expression102 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_expression106 = new BitSet(new long[]{0x0000000060D81680L});
+    public static final BitSet FOLLOW_23_in_expression102 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_expression106 = new BitSet(new long[]{0x00000000C1B03680L});
     public static final BitSet FOLLOW_expression_in_expression110 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_19_in_expression118 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_expression122 = new BitSet(new long[]{0x0000000060D81680L});
+    public static final BitSet FOLLOW_20_in_expression118 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_expression122 = new BitSet(new long[]{0x00000000C1B03680L});
     public static final BitSet FOLLOW_expression_in_expression126 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_23_in_expression134 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_expression138 = new BitSet(new long[]{0x0000000060D81680L});
+    public static final BitSet FOLLOW_24_in_expression134 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_expression138 = new BitSet(new long[]{0x00000000C1B03680L});
     public static final BitSet FOLLOW_expression_in_expression142 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_29_in_expression150 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_expression154 = new BitSet(new long[]{0x0000000060D81680L});
+    public static final BitSet FOLLOW_30_in_expression150 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_expression154 = new BitSet(new long[]{0x00000000C1B03680L});
     public static final BitSet FOLLOW_expression_in_expression158 = new BitSet(new long[]{0x0000000000000008L});
     public static final BitSet FOLLOW_NEGATION_in_expression166 = new BitSet(new long[]{0x0000000000000004L});
     public static final BitSet FOLLOW_expression_in_expression170 = new BitSet(new long[]{0x0000000000000008L});
     public static final BitSet FOLLOW_MATH_in_expression178 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_expression182 = new BitSet(new long[]{0x0000000060D81688L});
+    public static final BitSet FOLLOW_expression_in_expression182 = new BitSet(new long[]{0x00000000C1B03688L});
     public static final BitSet FOLLOW_expression_in_expression187 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_30_in_expression197 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_logical_in_expression201 = new BitSet(new long[]{0x0000000060D81680L});
-    public static final BitSet FOLLOW_expression_in_expression205 = new BitSet(new long[]{0x0000000060D81680L});
+    public static final BitSet FOLLOW_31_in_expression197 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_logical_in_expression201 = new BitSet(new long[]{0x00000000C1B03680L});
+    public static final BitSet FOLLOW_expression_in_expression205 = new BitSet(new long[]{0x00000000C1B03680L});
     public static final BitSet FOLLOW_expression_in_expression209 = new BitSet(new long[]{0x0000000000000008L});
     public static final BitSet FOLLOW_FLOAT_in_expression216 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_VOLTAGE_in_expression222 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_14_in_logical238 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_logical_in_logical242 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_16_in_logical250 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_logical_in_logical254 = new BitSet(new long[]{0x000000009F01C000L});
-    public static final BitSet FOLLOW_logical_in_logical258 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_31_in_logical266 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_logical_in_logical270 = new BitSet(new long[]{0x000000009F01C000L});
-    public static final BitSet FOLLOW_logical_in_logical274 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_comparison_in_logical284 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_27_in_comparison301 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_comparison306 = new BitSet(new long[]{0x0000000060D81680L});
-    public static final BitSet FOLLOW_expression_in_comparison310 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_24_in_comparison318 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_comparison323 = new BitSet(new long[]{0x0000000060D81680L});
-    public static final BitSet FOLLOW_expression_in_comparison327 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_28_in_comparison335 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_comparison339 = new BitSet(new long[]{0x0000000060D81680L});
-    public static final BitSet FOLLOW_expression_in_comparison343 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_25_in_comparison351 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_comparison355 = new BitSet(new long[]{0x0000000060D81680L});
-    public static final BitSet FOLLOW_expression_in_comparison359 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_26_in_comparison367 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_comparison371 = new BitSet(new long[]{0x0000000060D81680L});
-    public static final BitSet FOLLOW_expression_in_comparison375 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_15_in_comparison383 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expression_in_comparison387 = new BitSet(new long[]{0x0000000060D81680L});
-    public static final BitSet FOLLOW_expression_in_comparison391 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_TIME_in_expression228 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_15_in_logical244 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_logical_in_logical248 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_17_in_logical256 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_logical_in_logical260 = new BitSet(new long[]{0x000000013E038000L});
+    public static final BitSet FOLLOW_logical_in_logical264 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_32_in_logical272 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_logical_in_logical276 = new BitSet(new long[]{0x000000013E038000L});
+    public static final BitSet FOLLOW_logical_in_logical280 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_comparison_in_logical290 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_28_in_comparison307 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_comparison312 = new BitSet(new long[]{0x00000000C1B03680L});
+    public static final BitSet FOLLOW_expression_in_comparison316 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_25_in_comparison324 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_comparison329 = new BitSet(new long[]{0x00000000C1B03680L});
+    public static final BitSet FOLLOW_expression_in_comparison333 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_29_in_comparison341 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_comparison345 = new BitSet(new long[]{0x00000000C1B03680L});
+    public static final BitSet FOLLOW_expression_in_comparison349 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_26_in_comparison357 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_comparison361 = new BitSet(new long[]{0x00000000C1B03680L});
+    public static final BitSet FOLLOW_expression_in_comparison365 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_27_in_comparison373 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_comparison377 = new BitSet(new long[]{0x00000000C1B03680L});
+    public static final BitSet FOLLOW_expression_in_comparison381 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_16_in_comparison389 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expression_in_comparison393 = new BitSet(new long[]{0x00000000C1B03680L});
+    public static final BitSet FOLLOW_expression_in_comparison397 = new BitSet(new long[]{0x0000000000000008L});
 
 }
