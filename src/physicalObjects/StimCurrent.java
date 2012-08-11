@@ -1,14 +1,14 @@
 package physicalObjects;
 
-import modelView.Expression;
 import modelView.PopupHelper;
-import expressionEvaluator.ParseException;
+import expressionHandling.NumericExpression;
+import expressionParsing.ParseException;
 
 public class StimCurrent extends Current {
 	
-	private Expression stimulus;
+	private NumericExpression stimulus;
 	
-	public StimCurrent(String name, Expression stimulus) {
+	public StimCurrent(String name, NumericExpression stimulus) {
 		super(name);
 		this.stimulus = stimulus;
 	}

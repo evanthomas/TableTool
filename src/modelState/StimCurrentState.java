@@ -1,7 +1,7 @@
 package modelState;
 
+import expressionHandling.NumericExpression;
 import modelView.CurrentTab;
-import modelView.Expression;
 import modelView.ModelDesignerView;
 import modelView.StimCurrentTab;
 import physicalObjects.StimCurrent;
@@ -10,9 +10,9 @@ public class StimCurrentState extends CurrentState {
 
 	private static final long serialVersionUID = 1L;
 	
-	private Expression stimulus;
+	private NumericExpression stimulus;
 	
-	public StimCurrentState(StimCurrentTab ui, String name, Expression stimulus) {
+	public StimCurrentState(StimCurrentTab ui, String name, NumericExpression stimulus) {
 		super(ui, name);
 		this.stimulus = stimulus;
 		physicalCurrent = new StimCurrent(name, stimulus);
@@ -34,7 +34,7 @@ public class StimCurrentState extends CurrentState {
 	}
 
 
-	public Expression getStimulus() {
+	public NumericExpression getStimulus() {
 		return stimulus;
 	}
 }

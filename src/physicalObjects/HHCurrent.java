@@ -4,21 +4,21 @@ package physicalObjects;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import modelView.Expression;
 
-import expressionEvaluator.ParseException;
+import expressionHandling.NumericExpression;
+import expressionParsing.ParseException;
 
 public class HHCurrent extends Current {
 
 	private ArrayList<HHGate> gateList;
 	
-	private Expression gMaxEH;
-	private Expression ErEH;
+	private NumericExpression gMaxEH;
+	private NumericExpression ErEH;
 	private double gMax;
 	private double Er;
 	
 	
-	public HHCurrent(String name, Expression gMaxEH, Expression ErEH) {
+	public HHCurrent(String name, NumericExpression gMaxEH, NumericExpression ErEH) {
 		super(name);
 		gateList = new ArrayList<HHGate>();
 		this.gMaxEH = gMaxEH;

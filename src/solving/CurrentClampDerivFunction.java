@@ -2,7 +2,7 @@ package solving;
 
 import java.util.ArrayList;
 
-import expressionEvaluator.ParseException;
+import expressionParsing.ParseException;
 
 import modelState.AppState;
 import modelState.CurrentState;

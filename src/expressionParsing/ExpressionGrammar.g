@@ -1,4 +1,4 @@
-grammar GateGrammar;
+grammar ExpressionGrammar;
 
 options {
   language = Java;
@@ -9,6 +9,7 @@ options {
 
 tokens {
 NEGATION;
+MATH;
 }
 
 @header {
@@ -54,16 +55,23 @@ throw new RecognitionException();
 }
 gateExpression : add EOF! ;
 
-term
+symbol: ID EOF;
+
+term 
   : FLOAT
   | VOLTAGE
   | TIME
+  | ID
+  | maths
   | '('! add ')'!
-  | MATH^ '('! add ')'! {checkSingleMath($MATH.text);}
-  | MATH^ '('! add ','! add ')'! {checkDoubleMath($MATH.text);}
   | ternary
   ;
-   
+
+maths
+  : ID^ '('! add ')'!          {checkSingleMath($ID.text);}
+  | ID^ '('! add ','! add ')'! {checkDoubleMath($ID.text);}
+  ;
+  
 unary
   :
   ('+'! | negation^)? term
@@ -95,8 +103,8 @@ ternary
    ;
    
 logical
-  : comparison {System.out.println("d");}
-  | '('! or ')'! {System.out.println("e");}
+  : comparison 
+  | '('! or ')'! 
   ;
   
  not
@@ -183,5 +191,5 @@ FLOAT
   DIGIT* (DOT DIGIT*)? (EXPONENT SIGN? DIGIT+)?
   ;
 
-fragment LETTER : ('a'..'z');
-  MATH : LETTER+;
+fragment LETTER : 'a'..'z' | 'A'..'Z';
+  ID : LETTER (LETTER|DIGIT)*;

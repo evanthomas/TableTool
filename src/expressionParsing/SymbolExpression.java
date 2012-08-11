@@ -1,4 +1,4 @@
-package expressionEvaluator;
+package expressionParsing;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
@@ -7,25 +7,29 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 
-import expressionEvaluator.GateGrammarParser.gateExpression_return;
+import expressionEvaluator.ExpressionEvaluator;
+import expressionEvaluator.ExpressionGrammarLexer;
+import expressionEvaluator.ExpressionGrammarParser;
+import expressionEvaluator.ExpressionGrammarParser.symbol_return;
+//import expressionEvaluator.ExpressionGrammarParser.symbolExpression_return;
 
-public class Function {
+public class SymbolExpression {
 
 	private String expr;
-	private GateFunctionEvaluator gf;
+	private ExpressionEvaluator gf;
 	private CommonTreeNodeStream nodeStream;
 	
-	public Function(String expr) throws ParseException {
+	public SymbolExpression(String expr) throws ParseException {
 		this.expr = expr;
 		// Parse the expression and generate the AST
 		CharStream stream = new ANTLRStringStream(expr);
-		GateGrammarLexer lexer = new GateGrammarLexer(stream);
+		ExpressionGrammarLexer lexer = new ExpressionGrammarLexer(stream);
 		TokenStream tokenStream = new CommonTokenStream(lexer);
-		GateGrammarParser parser = new GateGrammarParser(tokenStream);
-		gateExpression_return gfParser = null;
+		ExpressionGrammarParser parser = new ExpressionGrammarParser(tokenStream);
+		symbol_return gfParser = null;
 		
 		try {
-			gfParser = parser.gateExpression();
+			gfParser = parser.symbol();
 		} catch (RecognitionException e) {
 			throw new ParseException("All your input are crap.");
 		}
@@ -36,26 +40,16 @@ public class Function {
 		}
 		
 		// Generate the function from the AST
-		nodeStream= new CommonTreeNodeStream(gfParser.tree); 
-		gf = new GateFunctionEvaluator(nodeStream);		
+		nodeStream= new CommonTreeNodeStream(gfParser.getTree()); 
+		gf = new ExpressionEvaluator(nodeStream);		
 	}
 	
 	public String getExpr() { return expr; }
-	
-	public double evalV(double v) throws ParseException { 
-		gf.setV(v);
-		return eval();
-	}
-	
-	public double evalT(double t) throws ParseException {
-		gf.setT(t);
-		return eval();
-	}
-	
-	public double eval() throws ParseException {
+		
+	public String eval() throws ParseException {
 		nodeStream.rewind(0);
 		try {
-			return gf.gateFunction();
+			return gf.symbolName();
 		} catch (RecognitionException e) {
 			throw(new ParseException(e.getMessage()));
 		}

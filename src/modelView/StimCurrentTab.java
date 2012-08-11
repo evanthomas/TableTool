@@ -14,6 +14,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EtchedBorder;
 
+import expressionHandling.ExpressionListener;
+import expressionHandling.NumericExpression;
+
 import modelState.AppState;
 import modelState.CurrentState;
 import modelState.StimCurrentState;
@@ -23,7 +26,7 @@ public class StimCurrentTab extends CurrentTab {
 	private static final long serialVersionUID = 1L;
 	
 	private JTextArea stimTextField;
-	private Expression stimulus;
+	private NumericExpression stimulus;
 
 
 	/**
@@ -35,7 +38,7 @@ public class StimCurrentTab extends CurrentTab {
 
 		initialize();
 		
-		stimulus = new Expression(stimTextField);
+		stimulus = new NumericExpression(stimTextField);
 		stimTextField.getDocument().addDocumentListener(new ExpressionListener(stimulus));
 		
 		currentState = new StimCurrentState(this, myName(), stimulus);
@@ -53,8 +56,8 @@ public class StimCurrentTab extends CurrentTab {
 		this.currentState = currentState;
 		currentState.setUI(this);
 		stimulus = currentState.getStimulus();
-		
 		stimulus.setUI(stimTextField);
+		stimTextField.getDocument().addDocumentListener(new ExpressionListener(stimulus));
 		
 		CurrentTabPanel.setSelectedComponent(this);		
 	}

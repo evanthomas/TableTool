@@ -1,7 +1,8 @@
-package modelView;
+package expressionHandling;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 
 public class ExpressionListener implements DocumentListener {
 
@@ -12,17 +13,17 @@ public class ExpressionListener implements DocumentListener {
 	}
 	@Override
 	public void changedUpdate(DocumentEvent e) {
-		expression.textFieldHandler();
+		expression.textFieldUpdate();
 	}
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		expression.textFieldHandler();
+		expression.textFieldUpdate();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-		expression.textFieldHandler();
+		expression.textFieldUpdate();
 	}
 
 }

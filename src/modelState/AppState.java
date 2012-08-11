@@ -9,16 +9,15 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
-import physicalObjects.HHCurrent;
-import physicalObjects.HHGate;
 
-import modelView.Expression;
 import modelView.ModelDesignerView;
 import modelView.PopupHelper;
-
+import physicalObjects.HHCurrent;
+import physicalObjects.HHGate;
 import solving.ClampMode;
 import solving.SolverType;
-import expressionEvaluator.ParseException;
+import expressionHandling.NumericExpression;
+import expressionParsing.ParseException;
 import floatingPoint.FloPoCoException;
 import floatingPoint.FloPoCoTable;
 
@@ -29,12 +28,12 @@ public class AppState {
 	
 	private static ClampMode clampMode;
 	
-	private static Expression vLo;
-	private static Expression vHi;
-	private static Expression numEntries;
-	private static Expression tolerance;
-	private static Expression capacitance;
-	private static Expression rundur;
+	private static NumericExpression vLo;
+	private static NumericExpression vHi;
+	private static NumericExpression numEntries;
+	private static NumericExpression tolerance;
+	private static NumericExpression capacitance;
+	private static NumericExpression rundur;
 	
 	private static boolean doCurrentPlots;
 	private static boolean doVoltagePlots;
@@ -114,7 +113,7 @@ public class AppState {
 		}
 	}
 	
-	public static final void setvLo(Expression vLo) {
+	public static final void setvLo(NumericExpression vLo) {
 		AppState.vLo = vLo;
 	}
 	
@@ -126,7 +125,7 @@ public class AppState {
 		}
 	}
 	
-	public static final void setvHi(Expression vHi) {
+	public static final void setvHi(NumericExpression vHi) {
 		AppState.vHi = vHi;
 	}
 	
@@ -138,7 +137,7 @@ public class AppState {
 		}
 	}
 	
-	public static final void setNumEntries(Expression numEntries) {
+	public static final void setNumEntries(NumericExpression numEntries) {
 		AppState.numEntries = numEntries;
 	}
 	
@@ -150,31 +149,31 @@ public class AppState {
 		}
 	}
 	
-	public static final Expression getCapacitanceEH() {
+	public static final NumericExpression getCapacitanceEH() {
 		return capacitance;
 	}
 	
-	public static final Expression getRundurEH() {
+	public static final NumericExpression getRundurEH() {
 		return rundur;
 	}
 	
-	public static final Expression getToleranceEH() {
+	public static final NumericExpression getToleranceEH() {
 		return tolerance;
 	}
 	
-	public static final Expression getNumEntriesEH() {
+	public static final NumericExpression getNumEntriesEH() {
 		return numEntries;
 	}
 	
-	public static final Expression getvLoEH() {
+	public static final NumericExpression getvLoEH() {
 		return vLo;
 	}
 	
-	public static final Expression getvHiEH() {
+	public static final NumericExpression getvHiEH() {
 		return vHi;
 	}
 	
-	public static final void setCapatiance(Expression capacitance) {
+	public static final void setCapatiance(NumericExpression capacitance) {
 		AppState.capacitance = capacitance;
 	}
 	
@@ -186,7 +185,7 @@ public class AppState {
 		}
 	}
 	
-	public static final void setRundur(Expression rundur) {
+	public static final void setRundur(NumericExpression rundur) {
 		AppState.rundur = rundur;
 	}
 	
@@ -198,11 +197,11 @@ public class AppState {
 		}
 	}
 	
-	public static final void setTolerance(Expression tolerance) {
+	public static final void setTolerance(NumericExpression tolerance) {
 		AppState.tolerance = tolerance;
 	}
 	
-	public static void setCapacitance(Expression capacitance) {
+	public static void setCapacitance(NumericExpression capacitance) {
 		AppState.capacitance = capacitance;
 	}
 	
@@ -242,7 +241,6 @@ public class AppState {
 		out.writeObject(clampMode);
 		out.writeBoolean(doCurrentPlots);
 		out.writeBoolean(doGatePlots);
-//		out.writeBoolean(doStimulusPlots);
 		out.writeBoolean(doVoltagePlots);
 		out.writeObject(currentList);
 
@@ -270,8 +268,6 @@ public class AppState {
 			ui.setDoCurrentPlots(doCurrentPlots);
 			doGatePlots = in.readBoolean();
 			ui.setDoGatePlots(doGatePlots);
-//			doStimulusPlots = in.readBoolean();
-//			ui.setDoStimulusPlots(doStimulusPlots);
 			doVoltagePlots = in.readBoolean();
 			ui.setDoVoltagePlots(doVoltagePlots);
 			currentList = (ArrayList<CurrentState>)in.readObject();

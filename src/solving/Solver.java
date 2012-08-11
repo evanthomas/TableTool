@@ -22,7 +22,7 @@ import physicalObjects.HHCurrent;
 import physicalObjects.HHGate;
 import plotting.ODESolutionPlotter;
 
-import expressionEvaluator.ParseException;
+import expressionParsing.ParseException;
 import modelState.AppState;
 import modelState.CurrentState;
 

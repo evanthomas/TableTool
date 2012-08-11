@@ -1,5 +1,7 @@
 package modelView;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,9 +9,11 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
+import javax.swing.AbstractCellEditor;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -32,6 +36,8 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumn;
 
 import modelState.AppState;
 import modelState.CurrentState;
@@ -40,13 +46,35 @@ import modelState.HHCurrentState;
 import solving.ClampMode;
 import solving.Solver;
 import solving.SolverType;
-import expressionEvaluator.ParseException;
+import expressionHandling.Expression;
+import expressionHandling.ExpressionListener;
+import expressionHandling.NumericExpression;
+import expressionHandling.SymbolExpression;
+import expressionParsing.ParseException;
 
 public class ModelDesignerView extends JFrame {
+	
+	private class ExpressionCellEditor extends AbstractCellEditor implements TableCellEditor  {
+
+		private static final long serialVersionUID = 1L;
+
+		private Expression currentExpression;
+		
+		@Override
+		public Object getCellEditorValue() {
+			return currentExpression;
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(JTable t, Object v,
+				boolean isSelected, int row, int column) {
+			currentExpression = globalExpressions.get(column).get(row);
+			JTextField tf = globalTextFields.get(column).get(row); 
+			return tf;
+		}
+	}
 
 	private static final long serialVersionUID = 1L;
-	
-	private JTable globalExpressionTable;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 
 	private JTabbedPane CurrentTabs;
@@ -56,19 +84,25 @@ public class ModelDesignerView extends JFrame {
 	
 	private JFileChooser tableFileChooser;
 	
-	private JComboBox solver;
+	private JComboBox<SolverType> solver;
 	private JTextField tolerance;
 	private JTextField capacitance;
 	private JTextField rundur;
 	private JTextField tableLowVoltage;
 	private JTextField tableHighVoltage;
 	private JTextField tableNumberEntries;
-	private ClampMode clampMode;
-	private JCheckBox chckbxCurrents;
-	private JCheckBox chckbxGates;
-	private JCheckBox chckbxVoltage;
+	private ClampMode  clampMode;
+	private JCheckBox  includeCurrents;
+	private JCheckBox  includeGates;
+	private JCheckBox  includeVoltage;
+	
+	private JTable globalExpressionTable;
+	private ArrayList<ArrayList<JTextField>> globalTextFields;
+	private ArrayList<ArrayList<Expression>> globalExpressions;
+	private ExpressionCellEditor [] expressionCellEditors;
 		
 	public ModelDesignerView() {
+		getContentPane().setPreferredSize(new Dimension(755, 800));
 		initialize();
 		
 		modelFileChooser = new JFileChooser();
@@ -79,30 +113,116 @@ public class ModelDesignerView extends JFrame {
 		tableFileChooser = new JFileChooser();
 		tableFileChooser.addChoosableFileFilter(new TableToolFileFilter("tbl", "*.tbl table files"));
 		tableFileChooser.setCurrentDirectory(new File("."));
-	
-		AppState.setvHi(new Expression(tableHighVoltage));
+
+		// Setup the global model parameter expressions
+		AppState.setvHi(new NumericExpression(tableHighVoltage));
 		tableHighVoltage.getDocument().addDocumentListener(new ExpressionListener(AppState.getvHiEH()));
-		AppState.setvLo(new Expression(tableLowVoltage));
+		AppState.setvLo(new NumericExpression(tableLowVoltage));
 		tableLowVoltage.getDocument().addDocumentListener(new ExpressionListener(AppState.getvLoEH()));
-		AppState.setNumEntries(new Expression(tableNumberEntries));
+		AppState.setNumEntries(new NumericExpression(tableNumberEntries));
 		tableNumberEntries.getDocument().addDocumentListener(new ExpressionListener(AppState.getNumEntriesEH()));
-		AppState.setTolerance(new Expression(tolerance));
+		AppState.setTolerance(new NumericExpression(tolerance));
 		tolerance.getDocument().addDocumentListener(new ExpressionListener(AppState.getToleranceEH()));
-		AppState.setCapacitance(new Expression(capacitance));
+		AppState.setCapacitance(new NumericExpression(capacitance));
 		capacitance.getDocument().addDocumentListener(new ExpressionListener(AppState.getCapacitanceEH()));
-		AppState.setRundur(new Expression(rundur));
+		AppState.setRundur(new NumericExpression(rundur));
 		rundur.getDocument().addDocumentListener(new ExpressionListener(AppState.getRundurEH()));
 
-		//		AppState.getNumEntriesEH().setString("16384");
-//		AppState.getToleranceEH().setString("0.01");
-//		AppState.getCapacitanceEH().setString("2");
-//		AppState.getRundurEH().setString("100");
-//		AppState.getvHiEH().setString("100");
-//		AppState.getvLoEH().setString("-100");
+		initGlobalsTable();
 		
 		solver.setSelectedItem(SolverType.Euler);
 	}
 	
+	private void initGlobalsTable() {
+		globalTextFields = new ArrayList<ArrayList<JTextField>>();
+		globalExpressions = new ArrayList<ArrayList<Expression>>();
+		expressionCellEditors = new ExpressionCellEditor[2];
+		
+		for(int col=0; col<globalExpressionTable.getColumnCount(); col++) {
+			TableColumn c = globalExpressionTable.getColumnModel().getColumn(col);
+			expressionCellEditors[col] = new ExpressionCellEditor();
+			c.setCellEditor(expressionCellEditors[col]);
+			globalExpressions.add(col, new ArrayList<Expression>());
+			
+			globalTextFields.add(col, new ArrayList<JTextField>());
+		
+			for(int row=0; row<globalExpressionTable.getRowCount(); row++) {
+				JTextField f = new JTextField();
+				Expression e;
+				if( col==0 ) {
+					e = new SymbolExpression(f);
+				} else {
+					e = new NumericExpression(f);
+				}
+				globalExpressions.get(col).add(row, e);
+				f.getDocument().addDocumentListener(new ExpressionListener(e));
+				globalTextFields.get(col).add(row, f);
+			}
+		}
+	}
+	
+	private void clearGlobalTable() {
+		for(int row=0; row<globalExpressionTable.getRowCount(); row++)
+			deleteGlobalTableRow();
+	}
+	
+	private void deleteGlobalTableRow() {
+		DefaultTableModel model = (DefaultTableModel) globalExpressionTable.getModel();
+		
+		if( model.getRowCount()==0 ) return;
+		
+		// If the user has a row selected delete that
+		int row = globalExpressionTable.getSelectedRow();
+		if( row!=-1 ) {
+			deleteGlobalTableRow(row);
+			return;
+		}
+		
+		// If no row selected find the first empty row
+		for(int i=0; i<model.getRowCount(); i++) {
+			boolean b = true;
+			for(int j=0; j<model.getColumnCount(); j++) {
+				Object s = model.getValueAt(i, j);
+				if( s==null || s.equals("") ) b &= true;
+				else b &= false;
+			}
+			if( b ) {
+				deleteGlobalTableRow(i);
+				return;
+			}
+		}
+		
+		// Couldn't find a good candidate just delete the last row.
+		deleteGlobalTableRow(model.getRowCount()-1);
+	}
+	
+	private void deleteGlobalTableRow(int row) {
+		DefaultTableModel model = (DefaultTableModel) globalExpressionTable.getModel();
+		model.removeRow(row);
+		model.fireTableChanged(null);
+		for(int col=0; col<globalExpressionTable.getColumnCount(); col++) {
+			// Editors seem to get lost after fireTableChange
+			TableColumn c = globalExpressionTable.getColumnModel().getColumn(col);
+			c.setCellEditor(expressionCellEditors[col]);
+
+			globalTextFields.get(col).remove(row);
+			globalExpressions.get(col).remove(row);
+		}
+	}
+	
+	public void addGlobalTableRow(String name, String value) {
+		DefaultTableModel model = (DefaultTableModel) globalExpressionTable.getModel();
+		model.addRow(new String[] {name, value});
+		
+		for(int col=0; col<globalExpressionTable.getColumnCount(); col++) {
+			JTextField f = new JTextField();
+			NumericExpression e = new NumericExpression(f);
+			f.getDocument().addDocumentListener(new ExpressionListener(e));
+			globalExpressions.get(col).add(e);
+			globalTextFields.get(col).add(f);
+		}
+	}
+
 	public CurrentTab addNewHHTab() {
 		return new HHCurrentTab(CurrentTabs);
 	}
@@ -121,6 +241,8 @@ public class ModelDesignerView extends JFrame {
 		setDoCurrentPlots(true);
 		setDoVoltagePlots(true);
 		setDoGatePlots(true);
+		
+		clearGlobalTable();
 	}
 
 	public void setSolver(SolverType s) { solver.setSelectedItem(s); }
@@ -134,9 +256,9 @@ public class ModelDesignerView extends JFrame {
 		}
 		assert false;
 	}
-	public void setDoCurrentPlots(boolean s)  { chckbxCurrents.setSelected(s); }
-	public void setDoVoltagePlots(boolean s)  { chckbxVoltage.setSelected(s);  }
-	public void setDoGatePlots(boolean s)     { chckbxGates.setSelected(s);    }
+	public void setDoCurrentPlots(boolean s)  { includeCurrents.setSelected(s); }
+	public void setDoVoltagePlots(boolean s)  { includeVoltage.setSelected(s);  }
+	public void setDoGatePlots(boolean s)     { includeGates.setSelected(s);    }
 
 	protected void toggleGatePlots(boolean b) {
 		for( CurrentState c : AppState.getCurrentList() ) {
@@ -302,16 +424,17 @@ public class ModelDesignerView extends JFrame {
 		JLabel lblSolver = new JLabel("Solver");
 		lblSolver.setBounds(16, 49, 36, 16);
 		
-		solver = new JComboBox();
+		solver = new JComboBox<SolverType>();
 		solver.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JComboBox b = (JComboBox)arg0.getSource();
+				@SuppressWarnings("unchecked")
+				JComboBox<SolverType> b = (JComboBox<SolverType>)arg0.getSource();
 				SolverType odeMethod = (SolverType)b.getSelectedItem();
 				AppState.setOdeMethod(odeMethod);
 			}
 		});
 		solver.setBounds(62, 46, 152, 20);
-		solver.setModel(new DefaultComboBoxModel(SolverType.values()));
+		solver.setModel(new DefaultComboBoxModel<SolverType>(SolverType.values()));
 		AppState.setOdeMethod((SolverType) solver.getSelectedItem());
 		
 		JLabel lblTolerancestepSize = new JLabel("Tolerance/step size");
@@ -384,32 +507,32 @@ public class ModelDesignerView extends JFrame {
 		tableNumberEntries.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		tableNumberEntries.setBounds(120, 90, 60, 20);
 		
-		chckbxCurrents = new JCheckBox("Currents");
-		chckbxCurrents.setSelected(true);
-		chckbxCurrents.addActionListener(new ActionListener() {
+		includeCurrents = new JCheckBox("Currents");
+		includeCurrents.setSelected(true);
+		includeCurrents.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AppState.setDoCurrentPlots(chckbxCurrents.isSelected());
+				AppState.setDoCurrentPlots(includeCurrents.isSelected());
 			}
 		});
-		chckbxCurrents.setBounds(16, 16, 89, 23);
+		includeCurrents.setBounds(16, 16, 89, 23);
 		
-		chckbxVoltage = new JCheckBox("Voltage");
-		chckbxVoltage.setSelected(true);
-		chckbxVoltage.addActionListener(new ActionListener() {
+		includeVoltage = new JCheckBox("Voltage");
+		includeVoltage.setSelected(true);
+		includeVoltage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AppState.setDoVoltagePlots(chckbxVoltage.isSelected());
+				AppState.setDoVoltagePlots(includeVoltage.isSelected());
 			}
 		});
-		chckbxVoltage.setBounds(139, 16, 74, 23);
+		includeVoltage.setBounds(139, 16, 74, 23);
 		
-		chckbxGates = new JCheckBox("Gates");
-		chckbxGates.setSelected(true);
-		chckbxGates.addActionListener(new ActionListener() {
+		includeGates = new JCheckBox("Gates");
+		includeGates.setSelected(true);
+		includeGates.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AppState.setDoGatePlots(chckbxGates.isSelected());
+				AppState.setDoGatePlots(includeGates.isSelected());
 			}
 		});
-		chckbxGates.setBounds(16, 42, 74, 23);
+		includeGates.setBounds(16, 42, 74, 23);
 		
 		JButton btnAllGatesOn = new JButton("All gates on");
 		btnAllGatesOn.addActionListener(new ActionListener() {
@@ -464,11 +587,22 @@ public class ModelDesignerView extends JFrame {
 		rdbtnVoltage.setBounds(93, 16, 77, 23);
 		buttonGroup.add(rdbtnVoltage);
 		
-		JButton btnNewRow = new JButton("New");
-		btnNewRow.setBounds(16, 248, 90, 23);
+		JButton btnNewRow = new JButton("New row");
+		btnNewRow.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				addGlobalTableRow(null, null);
+			}
+		});
+		btnNewRow.setBounds(16, 272, 90, 23);
 		
-		JButton btnDeleteRow = new JButton("Delete");
-		btnDeleteRow.setBounds(118, 248, 95, 23);
+		JButton btnDeleteRow = new JButton("delete row");
+		btnDeleteRow.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				deleteGlobalTableRow();
+			}
+			
+		});
+		btnDeleteRow.setBounds(118, 272, 95, 23);
 		
 		CurrentTabs = new JTabbedPane(JTabbedPane.TOP);
 		CurrentTabs.setBounds(10, 335, 735, 456);
@@ -477,9 +611,9 @@ public class ModelDesignerView extends JFrame {
 		plotOptionsPanel.setLayout(null);
 		plotOptionsPanel.add(btnAllGatesOn);
 		plotOptionsPanel.add(btnAllCurrentsOn);
-		plotOptionsPanel.add(chckbxCurrents);
-		plotOptionsPanel.add(chckbxGates);
-		plotOptionsPanel.add(chckbxVoltage);
+		plotOptionsPanel.add(includeCurrents);
+		plotOptionsPanel.add(includeGates);
+		plotOptionsPanel.add(includeVoltage);
 		plotOptionsPanel.add(btnAllGatesOff);
 		plotOptionsPanel.add(btnAllCurrentsOff);
 		panel.setLayout(null);
@@ -523,7 +657,7 @@ public class ModelDesignerView extends JFrame {
 		getContentPane().add(globalExpressionPanel);		
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(16, 25, 201, 200);
+		scrollPane.setBounds(16, 25, 201, 236);
 		globalExpressionPanel.add(scrollPane);
 		
 		globalExpressionTable = new JTable();
@@ -531,7 +665,8 @@ public class ModelDesignerView extends JFrame {
 		globalExpressionTable.setRowSelectionAllowed(false);
 		globalExpressionTable.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		globalExpressionTable.setModel(new DefaultTableModel(
-			new Object[][] {
+			new String[][] {
+				{null, null},
 				{null, null},
 				{null, null},
 				{null, null},
@@ -551,12 +686,13 @@ public class ModelDesignerView extends JFrame {
 			/**
 			 * 
 			 */
-			private static final long serialVersionUID = 2245720180545019300L;
+			private static final long serialVersionUID = 1L;
 			@SuppressWarnings("rawtypes")
 			Class[] columnTypes = new Class[] {
 				String.class, String.class
 			};
-			public Class<?> getColumnClass(int columnIndex) {
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			public Class getColumnClass(int columnIndex) {
 				return columnTypes[columnIndex];
 			}
 		});

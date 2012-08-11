@@ -27,7 +27,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import physicalObjects.HHGate;
-import expressionEvaluator.ParseException;
+import expressionParsing.ParseException;
 
 public class GatePlotter extends PlotFrame {
 

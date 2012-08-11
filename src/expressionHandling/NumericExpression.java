@@ -1,26 +1,20 @@
-package modelView;
+package expressionHandling;
 
 import java.awt.Color;
-import java.io.Serializable;
 
 import javax.swing.text.JTextComponent;
 
-import expressionEvaluator.Function;
-import expressionEvaluator.ParseException;
+import expressionParsing.Function;
+import expressionParsing.ParseException;
 
-public class Expression implements Serializable {
-
-
+public class NumericExpression extends Expression {
+	
 	private static final long serialVersionUID = 1L;
 
-	private String expr;
-	
 	private transient Function f;
-	private transient boolean valid;
-	private transient JTextComponent tf;
 	
-	public Expression(JTextComponent tf) {
-		this.tf = tf;
+	public NumericExpression(JTextComponent tf) {
+		super(tf);
 		valid = false;
 		f = null;
 	}
@@ -29,7 +23,7 @@ public class Expression implements Serializable {
 		this.expr = expr;
 		valid = false;
 		f = null;
-		if( expr==null || expr.equals("")) return; // Don't bug the user by complaining about stuff it hasn't filled in yet
+		if( expr==null || expr.equals("")) return; // Don't bug the user by complaining about stuff that isn't filled in yet
 		f = new Function(expr);
 		valid = true;
 	}
@@ -46,15 +40,11 @@ public class Expression implements Serializable {
 		return f.evalT(x);
 	}
 	
-	public String getExpr() { return expr; }
-	public boolean isValid() { return valid; }
-
-	public void textFieldHandler() {
+	public void textFieldUpdate() {
 		String expr = tf.getText();
 		try {
 			setStringOnly(expr);
 		} catch(ParseException ex) {
-			System.out.println(ex.getMessage());
 			tf.setBackground(Color.RED);
 			return;
 		}
@@ -79,12 +69,5 @@ public class Expression implements Serializable {
 		
 		tf.setBackground(Color.WHITE);
 		valid = true;
-	}
-	
-	public String toString() { return "Expr: "+expr+"  Function "+f; }
-
-	public void setUI(JTextComponent t) {
-		this.tf = t;
-		setString(expr);
 	}
 }

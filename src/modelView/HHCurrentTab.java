@@ -18,6 +18,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import expressionHandling.ExpressionListener;
+import expressionHandling.NumericExpression;
+
 import modelState.AppState;
 import modelState.CurrentState;
 import modelState.GateState;
@@ -30,8 +33,8 @@ public class HHCurrentTab extends CurrentTab {
 	private JTabbedPane gatePane;
 	private JTextField txtReversal;
 	private JTextField txtConductance;
-	private Expression reversal;
-	private Expression conductance;
+	private NumericExpression reversal;
+	private NumericExpression conductance;
 
 	// Used during create from UI
 	/**
@@ -43,11 +46,13 @@ public class HHCurrentTab extends CurrentTab {
 		
 		initialize();
 		
-		reversal = new Expression(txtReversal);
-		conductance = new Expression(txtConductance);
+		reversal = new NumericExpression(txtReversal);
+		conductance = new NumericExpression(txtConductance);
 		currentState = new HHCurrentState(this, myName(), conductance, reversal);
 		AppState.addCurrent(currentState);
-		
+		txtConductance.getDocument().addDocumentListener(new ExpressionListener(conductance));
+		txtReversal.getDocument().addDocumentListener(new ExpressionListener(reversal));
+	
 		CurrentTabPanel.setSelectedComponent(this);
 	}
 	

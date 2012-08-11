@@ -20,7 +20,9 @@ import javax.swing.event.ChangeListener;
 import modelState.GateState;
 import modelState.HHCurrentState;
 import plotting.GatePlotter;
-import expressionEvaluator.ParseException;
+import expressionHandling.ExpressionListener;
+import expressionHandling.NumericExpression;
+import expressionParsing.ParseException;
 
 public class GateTab extends JPanel {
 	
@@ -29,10 +31,10 @@ public class GateTab extends JPanel {
 	private JTabbedPane GateTabPanel;
 	private CurrentTab owningPanel;
 	private GateState gateState;
-	private Expression tau;
-	private Expression inf;
-	private Expression alpha;
-	private Expression beta;
+	private NumericExpression tau;
+	private NumericExpression inf;
+	private NumericExpression alpha;
+	private NumericExpression beta;
 	private JTextPane txtpnTau;
 	private JTextPane txtpnInf;
 	private JTextPane txtpnAlpha;
@@ -45,6 +47,7 @@ public class GateTab extends JPanel {
 	/**
 	 * @wbp.parser.constructor
 	 */
+	// Used during initial create
 	public GateTab(JTabbedPane GateTabPanel, CurrentTab owningPanel, HHCurrentState owningCurrent) {
 		super();
 		this.GateTabPanel = GateTabPanel;
@@ -53,20 +56,21 @@ public class GateTab extends JPanel {
 		initialize();
 		GateTabPanel.setSelectedComponent(this);		
 
-		tau   = new Expression(txtpnTau);
-		txtpnTau.getDocument().addDocumentListener(new ExpressionListener(GateTab.this.tau));
-		inf   = new Expression(txtpnInf);
-		txtpnInf.getDocument().addDocumentListener(new ExpressionListener(GateTab.this.inf));
-		alpha = new Expression(txtpnAlpha);
-		txtpnAlpha.getDocument().addDocumentListener(new ExpressionListener(GateTab.this.alpha));
-		beta  = new Expression(txtpnBeta);
-		txtpnBeta.getDocument().addDocumentListener(new ExpressionListener(GateTab.this.beta));
+		tau   = new NumericExpression(txtpnTau);
+		txtpnTau.getDocument().addDocumentListener(new ExpressionListener(tau));
+		inf   = new NumericExpression(txtpnInf);
+		txtpnInf.getDocument().addDocumentListener(new ExpressionListener(inf));
+		alpha = new NumericExpression(txtpnAlpha);
+		txtpnAlpha.getDocument().addDocumentListener(new ExpressionListener(alpha));
+		beta  = new NumericExpression(txtpnBeta);
+		txtpnBeta.getDocument().addDocumentListener(new ExpressionListener(beta));
 
 		this.owningCurrent = owningCurrent;
 		gateState = new GateState(this, owningCurrent, tau, inf, alpha, beta);
 		owningCurrent.addGate(gateState);
 	}
 
+	// Used during restore from save file
 	public GateTab(JTabbedPane GateTabPanel, HHCurrentTab owningPanel, GateState gateState) {
 		super();
 		this.GateTabPanel = GateTabPanel;
@@ -85,6 +89,10 @@ public class GateTab extends JPanel {
 		inf.setUI(txtpnInf);
 		alpha.setUI(txtpnAlpha);
 		beta.setUI(txtpnBeta);
+		txtpnTau.getDocument().addDocumentListener(new ExpressionListener(tau));
+		txtpnInf.getDocument().addDocumentListener(new ExpressionListener(inf));
+		txtpnAlpha.getDocument().addDocumentListener(new ExpressionListener(alpha));
+		txtpnBeta.getDocument().addDocumentListener(new ExpressionListener(beta));
 		
 		owningCurrent = (HHCurrentState) owningPanel.getHHCurrentState();
 	}

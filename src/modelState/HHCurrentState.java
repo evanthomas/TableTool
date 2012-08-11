@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
+import expressionHandling.NumericExpression;
+
 import modelView.CurrentTab;
-import modelView.Expression;
 import modelView.HHCurrentTab;
 import modelView.ModelDesignerView;
 
@@ -16,15 +17,15 @@ public class HHCurrentState extends CurrentState {
 
 	private static final long serialVersionUID = 1L;
 	
-	private Expression reversal;
-	private Expression conductance;
+	private NumericExpression reversal;
+	private NumericExpression conductance;
 	private ArrayList<GateState> gates;
 
 	public ArrayList<GateState> getGates() {
 		return gates;
 	}
 
-	public HHCurrentState(CurrentTab ui, String name, Expression conductance, Expression reversal) {
+	public HHCurrentState(CurrentTab ui, String name, NumericExpression conductance, NumericExpression reversal) {
 		super(ui, name);
 		this.reversal = reversal;
 		this.conductance = conductance;
@@ -49,11 +50,11 @@ public class HHCurrentState extends CurrentState {
 		return (HHCurrent)physicalCurrent;
 	}
 
-	public Expression getReversal() {
+	public NumericExpression getReversal() {
 		return reversal;
 	}
 
-	public Expression getConductance() {
+	public NumericExpression getConductance() {
 		return conductance;
 	}
 

@@ -2,7 +2,8 @@ package modelState;
 
 import java.io.Serializable;
 
-import modelView.Expression;
+import expressionHandling.NumericExpression;
+
 import modelView.GateTab;
 
 import physicalObjects.HHCurrent;
@@ -12,10 +13,10 @@ public class GateState implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Expression tau;
-	private Expression inf;
-	private Expression alpha;
-	private Expression beta;
+	private NumericExpression tau;
+	private NumericExpression inf;
+	private NumericExpression alpha;
+	private NumericExpression beta;
 	private int        exponent;
 	private boolean    enabled;
 	private String name;
@@ -23,7 +24,7 @@ public class GateState implements Serializable {
 	private transient HHGate  physicalGate;
 	private transient HHCurrent physicalCurrent;
 	
-	public GateState(GateTab ui, CurrentState owningCurrent, Expression tau, Expression inf, Expression alpha, Expression beta) {
+	public GateState(GateTab ui, CurrentState owningCurrent, NumericExpression tau, NumericExpression inf, NumericExpression alpha, NumericExpression beta) {
 		this.tau   = tau;
 		this.inf   = inf;
 		this.alpha = alpha;
@@ -37,19 +38,19 @@ public class GateState implements Serializable {
 		setEnabled(true);
 	}
 
-	public Expression getTau() {
+	public NumericExpression getTau() {
 		return tau;
 	}
 	
-	public Expression getInf() {
+	public NumericExpression getInf() {
 		return inf;
 	}
 	
-	public Expression getAlpha() {
+	public NumericExpression getAlpha() {
 		return alpha;
 	}
 	
-	public Expression getBeta() {
+	public NumericExpression getBeta() {
 		return beta;
 	}
 	

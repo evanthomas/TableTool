@@ -34,6 +34,7 @@ public class Main {
 				try {
 					ModelDesignerView window = new ModelDesignerView();
 					window.setVisible(true);
+					window.pack();
 					AppState.setUI(window);
 				} catch (Exception e) {
 					PopupHelper.fatalException("Failed opening window", e);
@@ -41,7 +42,7 @@ public class Main {
 				try {
 					AppState.restore(new File("simple muscle model.wmw"));
 				} catch (IOException e) {
-					PopupHelper.errorMessage(null, "model file not found.");
+					PopupHelper.errorMessage(null, "model file not found (probably).");
 				}
 			}
 		});

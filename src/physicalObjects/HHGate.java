@@ -1,15 +1,15 @@
 package physicalObjects;
 
 import modelState.AppState;
-import modelView.Expression;
-import expressionEvaluator.ParseException;
+import expressionHandling.NumericExpression;
+import expressionParsing.ParseException;
 
 public class HHGate {
 	
-	private Expression tauFn;
-	private Expression infFn;
-	private Expression alphaFn;
-	private Expression betaFn;
+	private NumericExpression tauFn;
+	private NumericExpression infFn;
+	private NumericExpression alphaFn;
+	private NumericExpression betaFn;
 	
 	private double [][] infTable;
 	private double [][] tauTable;
@@ -25,7 +25,7 @@ public class HHGate {
 	private String name;
 	private HHCurrent owner;
 	
-	public HHGate(String name, HHCurrent owner, Expression tauFn, Expression infFn, Expression alphaFn, Expression betaFn) {
+	public HHGate(String name, HHCurrent owner, NumericExpression tauFn, NumericExpression infFn, NumericExpression alphaFn, NumericExpression betaFn) {
 		this.tauFn   = tauFn;
 		this.infFn   = infFn;
 		this.alphaFn = alphaFn;
