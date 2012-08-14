@@ -47,8 +47,8 @@ public class GatePlotter extends PlotFrame {
 		tauTable = gate.getTauTable();
 		v        = gate.getVoltage();
 		
-		infData = createData(v, infTable, "inf");
-		tauData = createData(v, tauTable, "tau");
+		infData = createData(v, infTable, "inf", false);
+		tauData = createData(v, tauTable, "tau", true);
 		
         // based on the dataset we create the chart
         JFreeChart chart = createXYPlot(infData, tauData, plotTitle);
@@ -66,11 +66,14 @@ public class GatePlotter extends PlotFrame {
         AppState.registerGraph(this);
 	}
 	
-	private DefaultXYDataset createData(double v[], double y[], String lstr) {
+	private DefaultXYDataset createData(double v[], double y[], String lstr, boolean invert) {
 		DefaultXYDataset data = new DefaultXYDataset();
 		double [][]dataTable = new double[2][v.length];
 		for(int i=0; i<v.length; i++) {
-			dataTable[0][i] = y[i];
+			if( invert )
+				dataTable[0][i] = 1/y[i];
+			else
+				dataTable[0][i] = y[i];
 			dataTable[1][i] = v[i];
 		}
 		data.addSeries(lstr, dataTable);

@@ -1,9 +1,10 @@
 package modelView;
 
 import java.awt.EventQueue;
-import java.io.File;
-import java.io.IOException;
+import java.awt.Font;
+import java.util.Enumeration;
 
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -28,6 +29,8 @@ public class Main {
 			PopupHelper.fatalException("Failed setting look and feel", e);
 		}
 
+		fixFonts();  // Force font selection as a kludge to make it look good on smac.
+		
 		// Start main app window
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -39,12 +42,25 @@ public class Main {
 				} catch (Exception e) {
 					PopupHelper.fatalException("Failed opening window", e);
 				}
-				try {
-					AppState.restore(new File("simple muscle model.wmw"));
-				} catch (IOException e) {
-					PopupHelper.errorMessage(null, "model file not found (probably).");
-				}
+//				try {
+//					AppState.restore(new File("sodium channel voltage clamp.wmw"));
+//				} catch (IOException e) {
+//					PopupHelper.errorMessage(null, "model file not found (probably).");
+//				}
 			}
 		});
+	}
+
+	private static void fixFonts() {
+		UIDefaults defaults = UIManager.getDefaults();
+		Enumeration<Object> newKeys = defaults.keys();
+
+		while (newKeys.hasMoreElements()) {
+			Object obj = newKeys.nextElement();
+			Object value = UIManager.get(obj);
+			if (value instanceof Font) {
+				UIManager.put(obj, new Font( "Tahoma", Font.PLAIN, 11));
+			}
+		}
 	}
 }

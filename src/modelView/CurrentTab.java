@@ -9,6 +9,8 @@ import modelState.AppState;
 import modelState.CurrentState;
 
 public class CurrentTab extends JPanel {
+	public CurrentTab() {
+	}
 
 	/**
 	 * 

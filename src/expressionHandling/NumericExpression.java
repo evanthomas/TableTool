@@ -40,6 +40,10 @@ public class NumericExpression extends Expression {
 		return f.evalT(x);
 	}
 	
+	public double evalTV(double t, double v) throws ParseException {
+		return f.evalTV(t, v);
+	}
+	
 	public void textFieldUpdate() {
 		String expr = tf.getText();
 		try {

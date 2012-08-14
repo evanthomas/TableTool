@@ -40,7 +40,7 @@ public class Function {
 		
 		// Generate the function from the AST
 		nodeStream= new CommonTreeNodeStream(gfParser.getTree()); 
-		gf = new ExpressionEvaluator(nodeStream);		
+		gf = new ExpressionEvaluator(nodeStream);
 	}
 	
 	public String getExpr() { return expr; }
@@ -52,6 +52,12 @@ public class Function {
 	
 	public double evalT(double t) throws ParseException {
 		gf.setT(t);
+		return eval();
+	}
+	
+	public double evalTV(double t, double v) throws ParseException {
+		gf.setT(t);
+		gf.setV(v);
 		return eval();
 	}
 	

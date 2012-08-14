@@ -50,15 +50,13 @@ public class HHGate {
 	
 	public double deriv(double v, double x) {
 		state = x;
-		return (inf(v)-x)/tau(v);
+		return (inf(v)-x)*tau(v);
 	}
 	
 	public double openProbability() { return Math.pow(state, exponent); }
 	
 	// Called by solver
-	public double inf(double v) { 
-		return interp(v, infTable);
-		}
+	public double inf(double v) { return interp(v, infTable); }
 	public double tau(double v) { return interp(v, tauTable); }
 	
 	private double interp(double v, double[][] table) {
@@ -72,10 +70,10 @@ public class HHGate {
 		assert(dx<1);
 		return x + dx*(table[0][i+1]-table[0][i]); 
 	}
+	
 	public boolean isReady() {
 		return (tauFn!=null && infFn!=null) || (betaFn!=null && alphaFn!=null);
 	}
-
 
 	private void genInfTable() throws ParseException {
 		double [][] t = null;
@@ -114,7 +112,7 @@ public class HHGate {
 			} else {
 				x = tauFn.evalV(v);
 			}
-			t[0][i] = x;
+			t[0][i] = 1/x;
 			t[1][i] = v;
 			v += dv;
 		}

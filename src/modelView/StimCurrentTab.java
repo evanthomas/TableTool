@@ -14,12 +14,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EtchedBorder;
 
-import expressionHandling.ExpressionListener;
-import expressionHandling.NumericExpression;
-
 import modelState.AppState;
 import modelState.CurrentState;
 import modelState.StimCurrentState;
+import expressionHandling.ExpressionListener;
+import expressionHandling.NumericExpression;
 
 public class StimCurrentTab extends CurrentTab {
 
@@ -86,7 +85,7 @@ public class StimCurrentTab extends CurrentTab {
 			}
 		});
 		includeInPlots.setSelected(true);
-		includeInPlots.setBounds(141, 7, 172, 23);
+		includeInPlots.setBounds(100, 7, 220, 23);
 		add(includeInPlots);
 		
 		notes = new JEditorPane();
@@ -131,8 +130,8 @@ public class StimCurrentTab extends CurrentTab {
 		stimTextField.setBounds(436, 52, 230, 67);
 		add(stimTextField);
 		
-		JLabel lblStartms = new JLabel("I(t) (pA)");
-		lblStartms.setBounds(371, 52, 63, 16);
+		JLabel lblStartms = new JLabel("I(t) (pA)/V(t) (mV)");
+		lblStartms.setBounds(334, 52, 100, 16);
 		add(lblStartms);
 	}
 }

@@ -17,6 +17,7 @@ import physicalObjects.HHGate;
 import solving.ClampMode;
 import solving.SolverType;
 import expressionHandling.NumericExpression;
+import expressionHandling.SymbolTable;
 import expressionParsing.ParseException;
 import floatingPoint.FloPoCoException;
 import floatingPoint.FloPoCoTable;
@@ -26,7 +27,7 @@ public class AppState {
 
 	private static SolverType odeMethod;
 	
-	private static ClampMode clampMode;
+	private static ClampMode clampMode = ClampMode.CURRENT_CLAMP;
 	
 	private static NumericExpression vLo;
 	private static NumericExpression vHi;
@@ -35,28 +36,20 @@ public class AppState {
 	private static NumericExpression capacitance;
 	private static NumericExpression rundur;
 	
-	private static boolean doCurrentPlots;
-	private static boolean doVoltagePlots;
-	private static boolean doGatePlots;
-	private static boolean doStimulusPlots;
+	private static boolean doCurrentPlots = true;
+	private static boolean doVoltagePlots = true;
+	private static boolean doGatePlots = true;
+	private static boolean doStimulusPlots = true;
 	
-	private static ArrayList<CurrentState> currentList;
+	private static ArrayList<CurrentState> currentList = new ArrayList<CurrentState>();
 	
-	private static ArrayList<JFrame> graphPanelList;
+	private static ArrayList<JFrame> graphPanelList = new ArrayList<JFrame>();
+	
+	private static SymbolTable symbolTable = new SymbolTable();
  	
 	private static final int saveFileVersion = 1;
 	private static final int tableFileVersion = 1;
 
-	static {
-		currentList = new ArrayList<CurrentState>();
-		graphPanelList = new ArrayList<JFrame>();
-		clampMode = ClampMode.CURRENT_CLAMP;
-		doCurrentPlots = true;
-		doVoltagePlots = true;
-		doGatePlots = true;
-		doStimulusPlots = true;
-	}
-	
 	private static ModelDesignerView ui;
 	
 	public static final boolean doCurrentPlots() {
@@ -243,6 +236,7 @@ public class AppState {
 		out.writeBoolean(doGatePlots);
 		out.writeBoolean(doVoltagePlots);
 		out.writeObject(currentList);
+		out.writeObject(symbolTable);
 
 		out.close();
 	}
@@ -277,6 +271,10 @@ public class AppState {
 				CurrentState c = currentList.get(i); 
 				c.restore(ui);
 			}
+			
+			symbolTable = (SymbolTable)in.readObject();
+			ui.restoreGlobalsTable(symbolTable);
+			
 		} catch (ClassNotFoundException e) {
 			PopupHelper.fatalException("Logic error loading save file", e);
 		}
@@ -304,7 +302,7 @@ public class AppState {
 		 *    (repeated for each gate)
 		 *    exponent				int			4
 		 *    inf table				float		5*(# table entries)
-		 *    tau table				float		5*(# table entries)
+		 *    1/tau table			float		5*(# table entries)
 		 *    
 		 */
 		
@@ -371,5 +369,9 @@ public class AppState {
 	}
 	public static void registerGraph(JFrame f) {
 		graphPanelList.add(f);
+	}
+
+	public static SymbolTable getSymbolTable() {
+		return symbolTable;
 	}
 }

@@ -18,13 +18,12 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import expressionHandling.ExpressionListener;
-import expressionHandling.NumericExpression;
-
 import modelState.AppState;
 import modelState.CurrentState;
 import modelState.GateState;
 import modelState.HHCurrentState;
+import expressionHandling.ExpressionListener;
+import expressionHandling.NumericExpression;
 
 public class HHCurrentTab extends CurrentTab {
 	
@@ -110,7 +109,7 @@ public class HHCurrentTab extends CurrentTab {
 				delete();
 			}
 		});
-		btnDeleteThisCurrent.setBounds(21, 360, 63, 23);
+		btnDeleteThisCurrent.setBounds(21, 360, 71, 23);
 		
 		JLabel lblReversalPotentialmv = new JLabel("Reversal potential (mV)");
 		lblReversalPotentialmv.setBounds(21, 69, 147, 16);
@@ -121,7 +120,7 @@ public class HHCurrentTab extends CurrentTab {
 		txtReversal.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		txtReversal.setColumns(10);
 		
-		JLabel lblConductancems = new JLabel("Conductance (nS)");
+		JLabel lblConductancems = new JLabel("Conductance (pS)");
 		lblConductancems.setBounds(21, 106, 121, 16);
 		
 		txtConductance = new JTextField();
@@ -144,7 +143,7 @@ public class HHCurrentTab extends CurrentTab {
 				addNewTab();
 			}
 		});
-		btnNewGate.setBounds(21, 326, 78, 23);
+		btnNewGate.setBounds(21, 326, 102, 23);
 		
 		JButton btnRenameCurrent = new JButton("Rename");
 		btnRenameCurrent.addActionListener(new ActionListener() {
@@ -154,7 +153,7 @@ public class HHCurrentTab extends CurrentTab {
 				setName(newName);
 			}
 		});
-		btnRenameCurrent.setBounds(94, 360, 71, 23);
+		btnRenameCurrent.setBounds(94, 360, 74, 23);
 		
 		notes = new JEditorPane();
 		notes.addFocusListener(new FocusAdapter() {

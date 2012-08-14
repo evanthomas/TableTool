@@ -2,6 +2,9 @@ package solving;
 
 import java.util.ArrayList;
 
+import modelState.AppState;
+import modelState.CurrentState;
+
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.nonstiff.AdamsBashforthIntegrator;
 import org.apache.commons.math3.ode.nonstiff.AdamsMoultonIntegrator;
@@ -20,11 +23,9 @@ import org.apache.commons.math3.ode.sampling.StepInterpolator;
 import physicalObjects.Current;
 import physicalObjects.HHCurrent;
 import physicalObjects.HHGate;
+import physicalObjects.StimCurrent;
 import plotting.ODESolutionPlotter;
-
 import expressionParsing.ParseException;
-import modelState.AppState;
-import modelState.CurrentState;
 
 public class Solver implements Runnable {
 
@@ -33,19 +34,22 @@ public class Solver implements Runnable {
 	private static int ADAMSORDER =     4;
 	private static double V_INIT  =   -90; // mV
 	
-	private CurrentClampDerivFunction ccdf;
-	double[] yinit;
-	FirstOrderIntegrator integrator;
-	double rundur;
-	double[] state;
+	private AbstractDerivFunction ccdf;
+	private double[] yinit;
+	private FirstOrderIntegrator integrator;
+	private double rundur;
+	private double[] state;
 	private ArrayList<Double> time;
+	private ArrayList<Double> voltage;
 	private ArrayList<double[]> accumulatedState;
 	private ArrayList<double[]> accumulatedCurrent;
+	private ClampMode clampMode;
 	
 	public Solver() throws ParseException {
 		SolverType method = AppState.getOdeMethod();
 		double tolerance  = AppState.getTolerance();
 		rundur            = AppState.getRundur();
+		clampMode         = AppState.getClampMode();
 		
 		switch(method) {
 		case Euler:
@@ -85,7 +89,14 @@ public class Solver implements Runnable {
 			assert(false);		
 		}
 		
-		ccdf = new CurrentClampDerivFunction();
+		switch(clampMode) {
+			case CURRENT_CLAMP:
+				ccdf = new CurrentClampDerivFunction();
+				break;
+			case VOLTAGE_CLAMP:
+				ccdf = new VoltageClampDerivFunction();
+				break;
+		}
 		yinit = ccdf.initialConditions(V_INIT);		
 		StepHandler stepHandler = new StepHandler() {
 		    public void init(double t0, double[] y0, double t) {}
@@ -94,6 +105,7 @@ public class Solver implements Runnable {
 		        double   t = interpolator.getCurrentTime();
 		        double[] y = interpolator.getInterpolatedState();
 		        time.add(t);
+		        voltage.add(ccdf.getCurrentVoltage());
 		        accumulatedState.add(y.clone());
 		        accumulatedCurrent.add(ccdf.getCurrentCurrent().clone());
 		    }
@@ -102,6 +114,7 @@ public class Solver implements Runnable {
 		integrator.addStepHandler(stepHandler);
 		state = new double[ccdf.getDimension()];
 		time = new ArrayList<Double>();
+		voltage = new ArrayList<Double>();
 		accumulatedState = new ArrayList<double[]>();
 		accumulatedCurrent = new ArrayList<double[]>();
 	}
@@ -127,6 +140,7 @@ public class Solver implements Runnable {
 	
 	private void plotCurrent() {
 		if( !AppState.doCurrentPlots() ) return;
+		ClampMode clampMode = AppState.getClampMode();
 		
 		// Find out which currents are to be plotted
 		int numCurrents = 0;
@@ -135,6 +149,7 @@ public class Solver implements Runnable {
 			Current c = currentList.get(i).getPhysicalCurrent();
 			if( !c.enabled() ) continue;
 			if( !c.getIncludeInPlots() ) continue;
+			if( clampMode==ClampMode.VOLTAGE_CLAMP && c instanceof StimCurrent ) continue;
 			numCurrents++;
 		}
 		
@@ -149,11 +164,12 @@ public class Solver implements Runnable {
 				Current c = currentList.get(j).getPhysicalCurrent();
 				if( !c.enabled() ) continue;
 				if( !c.getIncludeInPlots() ) continue;
+				if( clampMode==ClampMode.VOLTAGE_CLAMP && c instanceof StimCurrent ) continue;
 				I[currentIndx++][i] = accumulatedCurrent.get(i)[j];
 				currentNames[j] = c.getName(); // Shouldn't be in the inner loop
 			}
 		}
-				
+
 		new ODESolutionPlotter("Current", t, I, currentNames);
 	}
 	
@@ -229,13 +245,13 @@ public class Solver implements Runnable {
 	}
 	
 	private double[][] getVoltage() {
-		int n = accumulatedState.size();
-		double[][] voltage = new double[1][n];
+		int n = voltage.size();
+		double[][] voltageArray = new double[1][n];
 		int N = ccdf.getDimension();
 		for(int i=0; i<n; i++) {
-			voltage[0][i] = accumulatedState.get(i)[N-1];
+			voltageArray[0][i] = voltage.get(i);
 		}
-		return voltage;
+		return voltageArray;
 	}
 	
 	public void go() {

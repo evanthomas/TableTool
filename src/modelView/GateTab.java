@@ -152,7 +152,7 @@ public class GateTab extends JPanel {
 		spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(0), null, new Integer(1)));
 		
 		JLabel lblExponent = new JLabel("Exponent");
-		lblExponent.setBounds(236, 81, 53, 14);
+		lblExponent.setBounds(217, 81, 72, 14);
 		
 		txtpnTau = new JTextPane();
 		txtpnTau.setBounds(8, 195, 153, 40);
@@ -179,7 +179,7 @@ public class GateTab extends JPanel {
 		txtpnAlpha.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 
 		JLabel lblBeta = new JLabel("beta (1/ms)");
-		lblBeta.setBounds(217, 239, 64, 16);
+		lblBeta.setBounds(217, 239, 87, 16);
 		
 		txtpnBeta = new JTextPane();
 		txtpnBeta.setBounds(173, 258, 153, 40);
@@ -191,7 +191,7 @@ public class GateTab extends JPanel {
 				gateState.setDoPlots(chckbxIncludeGateInPlots.isSelected());
 			}
 		});
-		chckbxIncludeGateInPlots.setBounds(102, 12, 180, 23);
+		chckbxIncludeGateInPlots.setBounds(90, 12, 214, 23);
 		chckbxIncludeGateInPlots.setSelected(true);
 		
 		JButton btnDeleteThisGate = new JButton("Delete");

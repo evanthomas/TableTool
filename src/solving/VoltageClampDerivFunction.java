@@ -10,34 +10,29 @@ import physicalObjects.HHGate;
 import physicalObjects.StimCurrent;
 import expressionParsing.ParseException;
 
-public class CurrentClampDerivFunction implements AbstractDerivFunction {
+public class VoltageClampDerivFunction implements AbstractDerivFunction {
 
 	private int N; // Dimension of the state vector
 	
 	private ArrayList<CurrentState> currentList;
 	private ArrayList<HHCurrent>    hhCurrentList;
-	private ArrayList<StimCurrent>  stimCurrentList;
+	private ArrayList<StimCurrent>  voltageStimList;
 	private ArrayList<HHGate>       gateList;
 	private double [] currentCurrent;
 	private double currentVoltage;
-	
-	private double Cm;
-	
-	public CurrentClampDerivFunction() throws ParseException {
+
+	public VoltageClampDerivFunction() throws ParseException {
 		currentList = AppState.getCurrentList();
 		
 		hhCurrentList = new ArrayList<HHCurrent>();
-		stimCurrentList = new ArrayList<StimCurrent>();
+		voltageStimList = new ArrayList<StimCurrent>();
 		gateList = new ArrayList<HHGate>();
 		
-		Cm = AppState.getCapacitance(); // May throw exception
-
 		int currentCnt = 0;
-		N = 1; // There is always voltage
 		for(int i=0; i<currentList.size(); i++) {
 			Current c = currentList.get(i).getPhysicalCurrent();
 			if( !c.enabled() ) continue;
-			if( c.getIncludeInPlots() ) currentCnt++;
+			if( c.getIncludeInPlots() && !(c instanceof StimCurrent) ) currentCnt++;
 			
 			c.initialise();
 			
@@ -54,55 +49,47 @@ public class CurrentClampDerivFunction implements AbstractDerivFunction {
 				}
 			}
 			
-			if( c instanceof StimCurrent ) stimCurrentList.add((StimCurrent) c);
+			if( c instanceof StimCurrent ) voltageStimList.add((StimCurrent) c);
 		}
 		
 		// Query gates and currents and determine data capture for plots
 		currentCurrent = new double[currentCnt];
 	}
-
+	
 	@Override
 	public void computeDerivatives(double t, double[] x, double[] dxdt) {
-		currentVoltage = x[N-1];
-		for(int i=0; i<N-1; i++) dxdt[i] = gateList.get(i).deriv(currentVoltage, x[i]);
 		
-		double totalI = 0, I=0;
-		int currentIndx = 0;
-		for(int i=0; i<stimCurrentList.size(); i++) {
-			StimCurrent c = stimCurrentList.get(i);
-			I = c.I(t);
-			totalI += I;
-			currentCurrent[currentIndx++] = I;
+		currentVoltage = 0;
+		for(int i=0; i<voltageStimList.size(); i++) {
+			StimCurrent c = voltageStimList.get(i);
+			currentVoltage += c.I(t);
 		}
+		
+		int currentIndx = 0;
 		for(int i=0; i<hhCurrentList.size(); i++) {
 			HHCurrent c = hhCurrentList.get(i); 
-			I = c.I(currentVoltage);
-			totalI += I;
-			currentCurrent[currentIndx++] = I;
+			currentCurrent[currentIndx++] = c.I(currentVoltage);
 		}
 		
-		dxdt[N-1] = totalI/Cm;
-		
+		for(int i=0; i<N; i++) dxdt[i] = gateList.get(i).deriv(currentVoltage, x[i]);
+
 		return;
 	}
-	
-	public double [] getCurrentCurrent() { return currentCurrent; }
 
 	@Override
-	public int getDimension() {
-		return N;
-	}
+	public int getDimension() {	return N; }
 
 	@Override
 	public double[] initialConditions(double v) {
 		double[] state = new double[N];
 		
-		for(int i=0; i<N-1; i++) state[i] = gateList.get(i).initialCondition(v);
-		
-		state[N-1] = v;
+		for(int i=0; i<N; i++) state[i] = gateList.get(i).initialCondition(v);
 		
 		return state;
 	}
+
+	@Override
+	public double[] getCurrentCurrent() { return currentCurrent; }
 
 	@Override
 	public double    getCurrentVoltage() { return currentVoltage; }

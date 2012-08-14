@@ -10,17 +10,18 @@ options {
 package expressionEvaluator;
 import java.lang.Math;
 import expressionHandling.SymbolTable;
+import expressionHandling.NumericExpression;
+import expressionParsing.ParseException;
+import modelState.AppState;
 }
-
+ 
 @members {
-
+  
 private double v;
 private double t;
-private SymbolTable symbolTable;
 
 public void setV(double v) { this.v = v; }
 public void setT(double t) { this.t = t; }
-public void setSymbolTable(SymbolTable s) { this.symbolTable = s; }
 
 private double math(String fn, double op1, double op2) {
 if( fn.equals("exp") ) return Math.exp(op1);
@@ -34,9 +35,19 @@ return 0; // Should never get here
 }
 
 private double SymbolTableLookup(String varName) {
-
-return 0;
+SymbolTable symbolTable = AppState.getSymbolTable();
+  NumericExpression e = symbolTable.get(varName);
+  if( e == null )
+  throw new IllegalArgumentException("Undefined symbol: "+varName);
+  try {
+  return e.evalTV(v, t);
+  } catch (ParseException ex) {
+  throw new IllegalArgumentException(ex.getMessage());
+  } catch (StackOverflowError sx) {
+  throw new IllegalArgumentException("Stack overflow - recursive call on symbol "+varName+"?");
+  }
 }
+
 }
 
 // An expression that evaulate as a double

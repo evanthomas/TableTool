@@ -11,6 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.AbstractCellEditor;
@@ -50,6 +53,7 @@ import expressionHandling.Expression;
 import expressionHandling.ExpressionListener;
 import expressionHandling.NumericExpression;
 import expressionHandling.SymbolExpression;
+import expressionHandling.SymbolTable;
 import expressionParsing.ParseException;
 
 public class ModelDesignerView extends JFrame {
@@ -161,9 +165,62 @@ public class ModelDesignerView extends JFrame {
 		}
 	}
 	
+	public void restoreGlobalsTable(SymbolTable symbolTable) {
+		// Called when UI is being restored from a file
+		DefaultTableModel model = (DefaultTableModel) globalExpressionTable.getModel();
+		int row = 0;
+		Set<?> set = symbolTable.entrySet();
+		Iterator<?> i = set.iterator();
+		while(i.hasNext()) { 
+			Map.Entry me = (Map.Entry)i.next(); 
+			String var = (String)me.getKey();
+			
+			// Column 0 is built from string
+			JTextField f = globalTextFields.get(0).get(row);
+			SymbolExpression s = new SymbolExpression(f);
+			s.setString(var);
+			SymbolExpression olds = (SymbolExpression) globalExpressions.get(0).get(row);
+			olds = s;
+			f.setText(var);
+			model.setValueAt(s, row, 0);
+
+			// Col 1 is built from an expression
+			f = globalTextFields.get(1).get(row);
+			NumericExpression n = (NumericExpression) me.getValue();
+			NumericExpression oldn = (NumericExpression) globalExpressions.get(1).get(row);
+			oldn = n;
+			n.setUI(f);
+			f.setText(n.getExpr());
+			model.setValueAt(n, row, 1);
+			
+			row++;
+		}
+		model.fireTableDataChanged();
+	}
+
+	
+	private void loadSymbolTable() {
+		SymbolTable st = AppState.getSymbolTable();
+		st.clear();
+		for(int row=0; row<globalExpressions.get(0).size(); row++) {
+			SymbolExpression s = (SymbolExpression) globalExpressions.get(0).get(row);
+			NumericExpression v = (NumericExpression) globalExpressions.get(1).get(row);
+			if( s==null ) continue;
+			String name = s.getExpr();
+			if( name==null || name.equals("") ) continue;
+			st.put(name, v);
+		}
+	}
+	
 	private void clearGlobalTable() {
-		for(int row=0; row<globalExpressionTable.getRowCount(); row++)
-			deleteGlobalTableRow();
+		DefaultTableModel model = (DefaultTableModel) globalExpressionTable.getModel();
+		for(int row=0; row<globalExpressionTable.getRowCount(); row++) {
+			for(int col=0; col<globalExpressionTable.getColumnCount(); col++) {
+				model.setValueAt(null, row, col);
+				Expression e = globalExpressions.get(col).get(row);
+				e.setString(null);
+			}
+		}
 	}
 	
 	private void deleteGlobalTableRow() {
@@ -281,7 +338,7 @@ public class ModelDesignerView extends JFrame {
 	 */
 	private void initialize() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ModelDesignerView.class.getResource("/images/whatmeworry.jpg")));
-		setTitle("Model Designer");
+		setTitle("TableTool");
 		setBounds(100, 100, 766, 868);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -372,11 +429,15 @@ public class ModelDesignerView extends JFrame {
 		JMenuItem mntmRun = new JMenuItem("Run");
 		mntmRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				loadSymbolTable();
 				Solver s = null;
 				try {
 					s = new Solver();
 				} catch (ParseException ex) {
 					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot start solver - "+ex.getMessage());
+					return;
+				} catch (IllegalArgumentException ex) { // Thrown during symbol lookup
+					PopupHelper.errorMessage(ModelDesignerView.this, ex.getMessage());
 					return;
 				}
 				s.go();
@@ -384,12 +445,6 @@ public class ModelDesignerView extends JFrame {
 		});
 		mntmRun.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK));
 		mnSimulate.add(mntmRun);
-		
-		JMenuItem mntmStop = new JMenuItem("Stop");
-		mnSimulate.add(mntmStop);
-		
-		JMenuItem mntmRestart = new JMenuItem("Restart");
-		mnSimulate.add(mntmRestart);
 		
 		JMenu mnDynamicclamp = new JMenu("DynamicClamp");
 		menuBar.add(mnDynamicclamp);
@@ -413,6 +468,25 @@ public class ModelDesignerView extends JFrame {
 		mntmGenerateTables.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_MASK));
 		mnDynamicclamp.add(mntmGenerateTables);
 		
+		JMenu mnAbout = new JMenu("Help");
+		menuBar.add(mnAbout);
+		
+		JMenuItem mntmHelp = new JMenuItem("Help");
+		mntmHelp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				PopupHelper.showHelp();
+			}
+		});
+		mnAbout.add(mntmHelp);
+		
+		JMenuItem mntmAbout = new JMenuItem("About");
+		mntmAbout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				PopupHelper.about(ModelDesignerView.this);
+			}
+		});
+		mnAbout.add(mntmAbout);
+		
 		JPanel globalExpressionPanel = new JPanel();
 		globalExpressionPanel.setBounds(518, 11, 227, 306);
 		globalExpressionPanel.setBorder(new TitledBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null), "Global expressions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -422,7 +496,7 @@ public class ModelDesignerView extends JFrame {
 		mainSettingsPanel.setBorder(new TitledBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null), "Main settings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		
 		JLabel lblSolver = new JLabel("Solver");
-		lblSolver.setBounds(16, 49, 36, 16);
+		lblSolver.setBounds(16, 49, 48, 16);
 		
 		solver = new JComboBox<SolverType>();
 		solver.addActionListener(new ActionListener() {
@@ -438,14 +512,14 @@ public class ModelDesignerView extends JFrame {
 		AppState.setOdeMethod((SolverType) solver.getSelectedItem());
 		
 		JLabel lblTolerancestepSize = new JLabel("Tolerance/step size");
-		lblTolerancestepSize.setBounds(239, 49, 111, 16);
+		lblTolerancestepSize.setBounds(239, 49, 128, 16);
 		
 		tolerance = new JTextField();
 		tolerance.setBounds(368, 47, 70, 20);
 		tolerance.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		
 		JLabel lblCellCapacitance = new JLabel("Cell capacitance (pF)");
-		lblCellCapacitance.setBounds(16, 87, 118, 16);
+		lblCellCapacitance.setBounds(16, 87, 134, 16);
 		
 		capacitance = new JTextField();
 		capacitance.setBounds(144, 85, 70, 20);
@@ -456,7 +530,7 @@ public class ModelDesignerView extends JFrame {
 		clampMode.setBorder(new TitledBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null), "Clamp mode", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		
 		JLabel lblRunDurationms = new JLabel("Run duration (ms)");
-		lblRunDurationms.setBounds(240, 87, 101, 16);
+		lblRunDurationms.setBounds(240, 87, 127, 16);
 		
 		rundur = new JTextField();
 		rundur.setBounds(368, 85, 70, 20);
@@ -468,7 +542,7 @@ public class ModelDesignerView extends JFrame {
 				addNewHHTab();
 			}
 		});
-		btnNewHHCurrent.setBounds(233, 259, 123, 26);
+		btnNewHHCurrent.setBounds(233, 259, 134, 26);
 		
 		JButton btnNewStim = new JButton("New stimulus");
 		btnNewStim.addActionListener(new ActionListener() {
@@ -492,7 +566,7 @@ public class ModelDesignerView extends JFrame {
 		JLabel lblHighmv = new JLabel("High (mV)");
 		lblHighmv.setBounds(16, 59, 67, 15);
 		
-		JLabel lblNumberOfEntries = new JLabel("Number of entries");
+		JLabel lblNumberOfEntries = new JLabel("Num of entries");
 		lblNumberOfEntries.setBounds(12, 93, 112, 15);
 		
 		tableLowVoltage = new JTextField();
@@ -523,7 +597,7 @@ public class ModelDesignerView extends JFrame {
 				AppState.setDoVoltagePlots(includeVoltage.isSelected());
 			}
 		});
-		includeVoltage.setBounds(139, 16, 74, 23);
+		includeVoltage.setBounds(139, 16, 95, 23);
 		
 		includeGates = new JCheckBox("Gates");
 		includeGates.setSelected(true);
@@ -584,7 +658,7 @@ public class ModelDesignerView extends JFrame {
 				AppState.setClampMode(ModelDesignerView.this.clampMode);
 			}
 		});
-		rdbtnVoltage.setBounds(93, 16, 77, 23);
+		rdbtnVoltage.setBounds(93, 16, 92, 23);
 		buttonGroup.add(rdbtnVoltage);
 		
 		JButton btnNewRow = new JButton("New row");

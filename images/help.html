@@ -1,0 +1,168 @@
+<html><body>
+<h1>Table Tool</h1>
+
+<h2>Introduction</h2>
+<p>Table Tool allows experimenters to convert models from Matlab or NEURON into a format that can be downloaded to an external dynamic clamp system.
+Table Tool encourages a workflow whereby models that are coded into Table Tool are compared against original model output and dynamic clamp output, thereby reducing
+the chance of transcription errors.
+<h3>Table Tool features
+<ul>
+<li>Support for Hodgkin-Huxely voltage gated channels.
+<li>Expression evaluation to allow easy transfer from exiting models.
+<li>Ability to simulate models.
+<li>Plotting of gate functions, membrane potential, currents and gate states.
+<li>Saving simulation output for comparison with original models.
+<li>Loading of external model output for comparison.
+<li>Load and save model files.
+<li>Generate binary files for download to the dynamic clamp.
+<li>Multi-platform compatibility.
+</ul>
+
+<h2>Expressions</h2>
+All text fields in Table Tool accept expressions. Text fields turn red if the expression is not valid.
+Expressions consists of:
+<ul>
+<li>Floating point numbers
+<li>Arithmetic operators (in precedence order) - (negation), ^ (exponent), * and /, + and -. 
+Parentheses can be used to control precedence.
+<li>Variable names, these start with a letter followed by letters of numbers, eg ENa, rundur, DavidKaplan.
+<li>Variables are defined in the Global Expressions tables. Variables can be defined in terms of other variables,
+however recursive definitions are not supported.
+<li>Special variable names v and t are reserved for voltage and time.
+<li>Maths functions: exp, sin, cos, tan, abs, max, min.
+<li>if statements. These have the syntax if(test, true value, false value). tests are constructed as follows
+<ul>
+<li>Comparison of two floating point numbers, <, >, <=, >=, ==, != (not equal)
+<li>Boolean logic with comparisons (in precedence order), ! (not), && (and), || (or)
+<li>Precedence can be explicitly controlled with parentheses
+<li>C style conversion between numbers and logicals is not supported
+</ul>
+For example a step current can be generated as if(10<=t&&t<=110, 30, 0). When time is between 10 and 110 this will evaluate to
+an output of 30 otherwise it return 0.
+</ul>
+
+<h2>Units</h2>
+Units are milliseconds (ms), millivolts (mV), picofarads (pF), picoamps (pA), nanosiemens (nS).
+
+<h2>Main Controls</h2>
+<h3>Main settings</h3>
+<table>
+<tr><td><b>Control</b></td><td><b>Description</b></td></tr>
+<tr><td>Solver</td><td>Numerical method used for the simulation</td></tr>
+<tr><td>Tolerance</td><td>The relative tolerance for variable step methods, the step size for fixed step methods</td></tr>
+<tr><td>Run duration</td><td>Simulation duration</td></tr>
+<tr><td>Clamp mode</td><td>Clamp mode for the simulation</td></tr>
+</table>
+<h3>Table parameters</h3>
+The dynamic clamp uses table lookup to calculate gate functions. These tables are used by Table Tool for its
+simulation allowing verification that the tables are suitable for use in the dynamic clamp. The high and low values
+determine the upper and lower limits of the tables with the number of entries as specified.
+<h3>Plot options</h3>
+These determine what plot windows are displayed and what there contents are.
+<table>
+<tr><td><b>Control</b></td><td><b>Description</b></td></tr>
+<tr><td>Currents</td><td>Display current-time plots</td></tr>
+<tr><td>Voltage</td><td>Display the voltage-time plot</td></tr>
+<tr><td>Gates</td><td>Display gate state-time plot</td></tr>
+<tr><td>Close all</td><td>Close all plot windows</td></tr>
+<tr><td>All gates on</td><td>Include all gates in gate plots</td></tr>
+<tr><td>All gates off</td><td>Exclude all gates from gate plots</td></tr>
+<tr><td>All currents on</td><td>Include all currents in currents plots</td></tr>
+<tr><td>All currents off</td><td>Exclude all currents from currents plots</td></tr>
+</table>
+<h3>Global expressions</h3>
+Global variables allow
+<ul>
+<li>Ready access important parameters
+<li>Definition of parameters that might be used in several places
+</ul>
+Row can be added or deleted from the table as needed.
+
+<h3>New currents</h3>
+<table>
+<tr><td><b>Control</b></td><td><b>Description</b></td></tr>
+<tr><td>New HH current</td><td>Create a new (voltage dependent) Hodgkin-Huxely current</td></tr>
+<tr><td>New Stimulus</td><td>Create a new (time dependent) stimulus. This will be interpreted as a current in current clamp mode
+and a voltage in voltage clamp mode.</td></tr>
+</table>
+
+<h2>Menus</h2>
+If you're reading this you obviously figured them out.
+
+<h2>Current definitions</h2>
+<h3>Hodgkin-Huxely currents</h3>
+<table>
+<tr><td><b>Control</b></td><td><b>Description</b></td></tr>
+<tr><td>Enabled</td><td>Include in simulations</td></tr>
+<tr><td>Include in simulation plots</td><td>Included in plots</td></tr>
+<tr><td>Reversal potential</td><td>Reversal for this current</td></tr>
+<tr><td>Conductance</td><td>Maximum conductance available for opening</td></tr>
+<tr><td>Notes</td><td>Free form descriptive text</td></tr>
+<tr><td>New gate</td><td>Create a new gate</td></tr>
+<tr><td>Delete</td><td>Delete this current</td></tr>
+<tr><td>Rename</td><td>Rename this current</td></tr>
+</table>
+
+<h3>Gates</h3>
+Gates can be expressed in tau/inf notation or alpha/beta notation.
+<table>
+<tr><td><b>Control</b></td><td><b>Description</b></td></tr>
+<tr><td>Enabled</td><td>Include in simulations, does not gate the current when not included</td></tr>
+<tr><td>Include in simulation plots</td><td>Included in plots</td></tr>
+<tr><td>Plot</td><td>Plots tau and inf as functions of voltage. Voltage values are taken from the Table parameters</td></tr>
+<tr><td>Delete</td><td>Delete this gate</td></tr>
+<tr><td>Rename</td><td>Rename this gate</td></tr>
+<tr><td>Exponent</td><td>The gate variable is raised to this power</td></tr>
+<tr><td>Notes</td><td>Free form descriptive text</td></tr>
+<tr><td>tau, inf, alpha, beta</td><td>gating functions</td></tr>
+</table>
+
+<h3>Stimuli</h3>
+<table>
+<tr><td><b>Control</b></td><td><b>Description</b></td></tr>
+<tr><td>Enabled</td><td>Include in simulations</td></tr>
+<tr><td>Include in simulation plots</td><td>Included in plots</td></tr>
+<tr><td>Notes</td><td>Free form descriptive text</td></tr>
+<tr><td>Delete</td><td>Delete this current</td></tr>
+<tr><td>Rename</td><td>Rename this current</td></tr>
+<tr><td>I(t) (pA)/V(t) (mV)</td><td>Stimulus value depending on the clamp mode</td></tr>
+</table>
+
+<h2>Plot Windows</h2>
+Plots can be zoomed using the mouse wheel and axes can be controlled with a popup menu activated by
+right clicking on the plot. Plot data can be save in ASCII format for loading into other programs. ASCII
+data can be loaded into the plot for comparison with Table Tool simulations. The "close all" button closes
+all open plot windows.
+
+<h2>Binary format</h2>
+Tables are currently saved to file as below. Floats are in FloPoCo format with 8 bit exponent and 23 bit mantissa.
+With the 2 auxiliary bits this is 33 bits which are then packaged into 5 bytes. Byte order for floats and ints is
+little endian.<br>
+<table>
+<tr><td><b>Field</b></td><td><b>Format</b></td><td><b>Length</b></td></tr>
+<tr><td>version</td><td>int</td><td>4</td></tr>
+<tr><td>Cm</td><td>float</td><td>5</td></tr>
+<tr><td>table low voltage</td><td>float</td><td>5</td></tr>
+<tr><td>table high voltage</td><td>float</td><td>5</td></tr>
+<tr><td># table entries</td><td>int</td><td>4</td></tr>
+<tr><td>number of currents</td><td>int</td><td>4</td></tr>
+<tr><td>(repeated for each current)</td><td></td><td></td></tr>
+<tr><td>Gmax</td><td>float</td><td>5</td></tr>
+<tr><td>Er</td><td>float</td><td>5</td></tr>
+<tr><td>number of gates</td><td>int</td><td>4</td></tr>
+<tr><td>(repeated for each gate)</td><td></td><td></td></tr>
+<tr><td>exponent</td><td>int</td><td>4</td></tr>
+<tr><td>inf table</td><td>float</td><td>5*(# table entries)</td></tr>
+<tr><td>1/tau table</td><td>float</td><td>5*(# table entries)</td></tr>
+</table>
+
+<h2>Credits</h2>
+Table Tool uses the following open source libraries and tools:<br>
+ANTLR for expression parsing and evaluation (BSD license)<br>
+jFreeChart for plotting (GNU Lesser General Public Licence)<br>
+The Apache Commons Mathematics Library for ODE solving (Apache license)<br>
+Alfred E. Neuman image (Licence unknown).
+
+<br><br>
+© Evan Thomas 2012
+</body></html>
