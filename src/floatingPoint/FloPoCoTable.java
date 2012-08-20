@@ -45,17 +45,31 @@ public class FloPoCoTable implements Iterable<Byte>, Iterator<Byte> {
 	private int bufferIndx;
 	
 	public Iterator<Byte> iterator() {
-		indx = 1;
+		indx = 0;
 		if( table.size()>0 ) {
-			currentFloat = table.get(0).iterator();
 			buffer = new byte[(table.get(0).size()+7)/8];
 			bufferIndx = 0;
+			fillBuffer();
 		} else {
 			currentFloat = null;
 			buffer = null;
 			bufferIndx = 0;
 		}
 		return this;
+	}
+
+	private void fillBuffer() {
+		currentFloat = table.get(indx++).iterator();
+		for(int i=0; i<buffer.length; i++) {
+			byte b = 0;
+			for(int j=0; j<8; j++) {
+				if( !currentFloat.hasNext() ) break;
+				boolean bit = currentFloat.next();
+				if( bit ) b |= 1<<j;
+			}
+			buffer[i] = b;
+		}
+		bufferIndx = 0;
 	}
 	
 	@Override
@@ -76,19 +90,8 @@ public class FloPoCoTable implements Iterable<Byte>, Iterator<Byte> {
 				return new Byte(buffer[bufferIndx++]);
 			}
 		}
-		
-		currentFloat = table.get(indx++).iterator();
-		for(int i=0; i<buffer.length; i++) {
-			byte b = 0;
-			for(int j=0; j<8; j++) {
-				if( !currentFloat.hasNext() ) break;
-				boolean bit = currentFloat.next();
-				if( bit ) b |= 1<<j;
-			}
-			buffer[i] = b;
-		}
-		bufferIndx = 0;
-		
+	
+		fillBuffer();
 		return next();
 	}
 

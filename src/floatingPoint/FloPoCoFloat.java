@@ -12,50 +12,11 @@ public class FloPoCoFloat extends BitSet implements Iterator<Boolean> {
 	private double value;
 	private int exponentWidth;
 	private int mantissaWidth;
-	private static Random r;
 	
-	static {
-		r = new Random();
-	}
-	
-	public FloPoCoFloat(int exponentWidth, int mantissaWidth) throws FloPoCoException {
+	private FloPoCoFloat(int exponentWidth, int mantissaWidth) throws FloPoCoException {
 		super(exponentWidth+mantissaWidth+3);
 		this.exponentWidth = exponentWidth;
 		this.mantissaWidth = mantissaWidth;
-		
-		// Random 
-		double m = r.nextDouble();
-		// exponent 2^-9<e<2^9 (not all java doubles are supported)
-		int e = r.nextInt(1<<10)-(1<<9);
-		// sign
-		int s = r.nextInt(2);
-		value = m;
-		if( e > 0)
-			for(int j=0; j<e; j++)  value *= 2;
-		else
-			for(int j=0; j<-e; j++) value /= 2;
-		value *= (2*s-1);
-		
-		convertFromDouble();
-	}
-	
-	public FloPoCoFloat(double value, int exponentWidth, int mantissaWidth) throws FloPoCoException {
-		super(exponentWidth+mantissaWidth+3);
-		this.exponentWidth = exponentWidth;
-		this.mantissaWidth = mantissaWidth;
-		this.value = value;
-		convertFromDouble();
-	}
-
-	public FloPoCoFloat(String value, int exponentWidth, int mantissaWidth) throws FloPoCoException {
-		super(exponentWidth+mantissaWidth+3);
-		this.exponentWidth = exponentWidth;
-		this.mantissaWidth = mantissaWidth;
-		this.value = Double.parseDouble(value);
-		convertFromDouble();
-	}
-	
-	private void convertFromDouble() throws FloPoCoException {
 		
 		if( exponentWidth<1 || mantissaWidth<1 )
 			throw new FloPoCoException("invalid parameter.");
@@ -65,8 +26,66 @@ public class FloPoCoFloat extends BitSet implements Iterator<Boolean> {
 		
 		if( mantissaWidth>53 )
 			throw new FloPoCoException("mantissa widths greater than 53 cannot be converted.");
-		
-		if( value == Double.NaN ) {
+
+	}
+	
+	public FloPoCoFloat(double value, int exponentWidth, int mantissaWidth) throws FloPoCoException {
+		this(exponentWidth, mantissaWidth);
+		this.value = value;
+		convertFromDouble();
+	}
+
+	public FloPoCoFloat(String value, int exponentWidth, int mantissaWidth) throws FloPoCoException {
+		this(exponentWidth, mantissaWidth);
+		this.value = Double.valueOf(value);
+		convertFromDouble();
+	}
+
+	public FloPoCoFloat(String value, int radix, int exponentWidth, int mantissaWidth) throws FloPoCoException {
+		this(exponentWidth, mantissaWidth);
+		switch(radix) {
+		case 2:
+			convertFromBinaryString(value);
+			break;
+		case 10:
+			convertFromDouble();
+			break;
+		case 16:
+			convertFromHexString(value);
+			break;
+		default:
+			throw new FloPoCoException("Only base 2, 10 and 16 conversion supported.");
+		}
+	}
+	
+	private void convertFromHexString(String value) throws FloPoCoException {
+		long p = Long.parseLong(value, 16);
+		for(int i=0; i<size(); i++) {
+			if( (p & (1<<i)) == 0 ) clear(i);
+			else set(i);
+		}
+	}
+
+	private void convertFromBinaryString(String value) throws FloPoCoException {
+		String s = value.replaceAll(" ", "");
+		for(int i=0; i<s.length(); i++) {
+			char c = s.charAt(i);
+			switch(c) {
+			case '1':
+				this.set(i);
+				break;
+			case '0':
+				this.clear(i);
+				break;
+			default:
+				throw new FloPoCoException("Invalid binary string");	
+			}
+			
+		}
+	}
+
+	private void convertFromDouble() throws FloPoCoException {
+		if( Double.isNaN(value) ) {
 			set(0, true);
 			set(1, true);
 			return;
@@ -79,7 +98,7 @@ public class FloPoCoFloat extends BitSet implements Iterator<Boolean> {
 			value = - value;
 		}
 		
-		if( value == Double.NEGATIVE_INFINITY || value==Double.POSITIVE_INFINITY ) {
+		if( Double.isInfinite(value) ) {
 			set(0, true);
 			set(1, false);
 			return;
@@ -143,6 +162,21 @@ public class FloPoCoFloat extends BitSet implements Iterator<Boolean> {
 		for(int i=0; i<mantissaWidth; i++) s.append(bitToChar(indx++));
 		
 		return new String(s);		
+	}
+	
+	public String toBitString() { return toString(); }
+	
+	public String toHexadecimalString() {
+		// Should really move the byte stream into this class
+		FloPoCoTable t = new FloPoCoTable();
+		t.add(this);
+		String s = "";
+		for(Byte b : t)	s += String.format("%02X", b);
+		return s;
+	}
+	
+	public String toDecimalString() {
+		return Double.toString(toDouble());
 	}
 	
 	public double toDouble() {
@@ -216,6 +250,9 @@ public class FloPoCoFloat extends BitSet implements Iterator<Boolean> {
 		}
 	}
 
+	// super.size() returns garbage
+	public int size() { return mantissaWidth+exponentWidth+3; }
+	
 	// Iterator interface
 	private int indx;
 	
@@ -237,5 +274,12 @@ public class FloPoCoFloat extends BitSet implements Iterator<Boolean> {
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
+
+	public int getExponentWidth() {
+		return exponentWidth;
+	}
 	
+	public int getMantissaWidth() {
+		return mantissaWidth;
+	}
 }
