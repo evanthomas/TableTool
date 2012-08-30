@@ -449,9 +449,10 @@ public class ModelDesignerView extends JFrame {
 		JMenu mnDynamicclamp = new JMenu("DynamicClamp");
 		menuBar.add(mnDynamicclamp);
 		
-		JMenuItem mntmGenerateTables = new JMenuItem("Generate tables");
+		JMenuItem mntmGenerateTables = new JMenuItem("Generate binary tables");
 		mntmGenerateTables.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				tableFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				int returnVal = tableFileChooser.showSaveDialog(ModelDesignerView.this);
 
 				if (returnVal != JFileChooser.APPROVE_OPTION) return;
@@ -465,8 +466,26 @@ public class ModelDesignerView extends JFrame {
 				}
 			}
 		});
-		mntmGenerateTables.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_MASK));
 		mnDynamicclamp.add(mntmGenerateTables);
+		
+		JMenuItem genCOEFileMenuItem = new JMenuItem("Generate coe files");
+		genCOEFileMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				tableFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				int returnVal = tableFileChooser.showSaveDialog(ModelDesignerView.this);
+
+				if (returnVal != JFileChooser.APPROVE_OPTION) return;
+				File tableFile = tableFileChooser.getSelectedFile();
+				try {
+					AppState.generateCOEFiles(tableFile);
+				} catch (ParseException ex) {
+					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot generate tables - "+ex.getMessage());
+				} catch (IOException ex) {
+					PopupHelper.errorMessage(ModelDesignerView.this, "Cannot save tables - "+ex.getMessage());
+				}
+			}
+		});
+		mnDynamicclamp.add(genCOEFileMenuItem);
 		
 		JMenu mnAbout = new JMenu("Help");
 		menuBar.add(mnAbout);

@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -20,6 +21,7 @@ import expressionHandling.NumericExpression;
 import expressionHandling.SymbolTable;
 import expressionParsing.ParseException;
 import floatingPoint.FloPoCoException;
+import floatingPoint.FloPoCoFloat;
 import floatingPoint.FloPoCoTable;
 
 // Essentially a singleton object that contains the state of the application
@@ -373,5 +375,71 @@ public class AppState {
 
 	public static SymbolTable getSymbolTable() {
 		return symbolTable;
+	}
+
+	public static void generateCOEFiles(File tableDirectory) throws ParseException, IOException {
+		try {
+			
+			for(CurrentState c : currentList) {
+				if( ! (c instanceof HHCurrentState) ) continue;
+				HHCurrent hhc = (HHCurrent) c.getPhysicalCurrent();
+				for( HHGate g : hhc.getGateList()) {
+					writeCOETables(hhc, g, tableDirectory);
+				}
+			}
+		} catch (FloPoCoException ex) {
+			PopupHelper.fatalException("Floating point exception writing table file", ex);
+		}
+		
+	}
+	
+	private static void writeCOETables(HHCurrent hhc, HHGate g, File tableDirectory)  throws ParseException, IOException, FloPoCoException {
+		{
+			String gateName = g.getName();
+			String currentName = hhc.getName();
+			String fileName = currentName+"_"+gateName+"_tau.coe";
+			double [] table = g.getTauTable();
+			File out = new File(tableDirectory, fileName);
+			PrintStream p = new PrintStream(out);
+			p.println(";");
+			p.println(";   Current="+currentName+" Gate="+gateName+" Table=1/tau");
+			p.println(";");
+			p.println("memory_initialization_radix=2;");
+			p.println("memory_initialization_vector=");
+			for(int i=0; i<table.length; i++) {
+				double t = 1/table[i];
+				FloPoCoFloat f = new FloPoCoFloat(t, 8, 23);
+				p.print(f.toString().replaceAll(" ", ""));
+				if( i==table.length-1 )
+					p.println(";");
+				else
+					p.println(",");
+			}
+			p.close();
+		}
+
+		{
+			String gateName = g.getName();
+			String currentName = hhc.getName();
+			String fileName = currentName+"_"+gateName+"_inf.coe";
+			double [] table = g.getInfTable();
+			File out = new File(tableDirectory, fileName);
+			PrintStream p = new PrintStream(out);
+			p.println(";");
+			p.println(";   Current="+currentName+" Gate="+gateName+" Table=inf");
+			p.println(";");
+			p.println("memory_initialization_radix=2;");
+			p.println("memory_initialization_vector=");
+			for(int i=0; i<table.length; i++) {
+				double t = table[i];
+				FloPoCoFloat f = new FloPoCoFloat(t, 8, 23);
+				p.print(f.toString().replaceAll(" ", ""));
+				if( i==table.length-1 )
+					p.println(";");
+				else
+					p.println(",");
+			}
+			p.close();
+		}
 	}
 }
